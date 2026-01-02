@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SochiHub</title>
+
+  <style>
+    body {
+      margin: 0;
+      height: 90vh;
+      background: #0f172a; /* dark theme */
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: Arial, sans-serif;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+      margin: 0;
+    }
+
+    p {
+      position: absolute;
+      bottom: -20px;
+      text-align: center;
+      width: 100%;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>SociHub</h1>
+  <p>Grow social accounts..</p>
+  <!-- Firebase SDKs -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+  import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+  import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+    authDomain: "socihub-a2731.firebaseapp.com",
+    projectId: "socihub-a2731",
+    storageBucket: "socihub-a2731.firebasestorage.app",
+    messagingSenderId: "815252223754",
+    appId: "1:815252223754:web:99a26383a59c2557412cf3",
+    measurementId: "G-KXW58D7RGM"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let hasRedirected = false;
+
+  function waitForOnline() {
+    return new Promise((resolve) => {
+      if (navigator.onLine) {
+        resolve();
+      } else {
+        window.addEventListener("online", () => resolve(), { once: true });
+      }
+    });
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (hasRedirected) return;
+
+    // 🛑 Stay on splash screen until internet is back
+    await waitForOnline();
+
+    let targetPage = "1page.html";
+
+    if (user) {
+      try {
+        const snap = await getDoc(doc(db, "users", user.uid));
+        if (snap.exists()) {
+          const role = snap.data().role;
+
+          if (role === "client") targetPage = "client-page.html";
+          else if (role === "earner") targetPage = "earner-page.html";
+          else if (role === "admin") targetPage = "admin-page.html";
+          else if (role === "owner") targetPage = "platform-dashboard.html";
+        }
+      } catch (err) {
+        console.error("Firestore error:", err);
+        return; // stay on screen if error
+      }
+    } else {
+      // user null BUT online → allow redirect
+    }
+
+    hasRedirected = true;
+
+    // ⏳ 8-second delay AFTER internet is confirmed
+    setTimeout(() => {
+      window.location.replace(targetPage);
+    }, 4000);
+  });
+</script>
+</body>
+</html>

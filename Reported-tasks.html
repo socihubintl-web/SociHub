@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suspended Tasks</title>
+<style>
+body {
+  font-family: Poppins, sans-serif;
+  margin: 0;
+  padding: 15px;
+  background: #f4f4f4;
+}
+h1 {
+  text-align: center;
+  color: #e63946;
+  margin-bottom: 20px;
+}
+.task-card {
+  background: #fff;
+  padding: 15px;
+  border-radius: 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  margin-bottom: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.task-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: #555;
+}
+.task-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 10px;
+}
+.task-buttons button {
+  flex: 1;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.confirm-btn { background: #00cc88; color: #fff; }
+.decline-btn { background: #e63946; color: #fff; }
+</style>
+</head>
+<body>
+
+<h1>Project Reports</h1>
+<div id="tasksContainer">Loading...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  onSnapshot,
+  doc,
+  updateDoc,
+  getDocs
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {  
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",  
+  authDomain: "socihub-a2731.firebaseapp.com",  
+  projectId: "socihub-a2731",  
+  storageBucket: "socihub-a2731.firebasestorage.app",  
+  messagingSenderId: "815252223754",  
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",  
+  measurementId: "G-KXW58D7RGM"  
+}; 
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+// DOM container
+const tasksContainer = document.getElementById("tasksContainer");
+
+// Wait for auth
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    alert("You must be signed in to view this page.");
+    window.location.href = "1page.html";
+    return;
+  }
+
+  // Query suspended tasks
+  const q = query(
+    collection(db, "tasks"),
+    where("status", "==", "Suspended")
+  );
+
+  onSnapshot(q, async (snapshot) => {
+    tasksContainer.innerHTML = "";
+
+    if (snapshot.empty) {
+      tasksContainer.innerHTML = "<p>No suspended tasks.</p>";
+      return;
+    }
+
+    for (const docSnap of snapshot.docs) {
+      const task = docSnap.data();
+      const suspension = task.suspension || {};
+
+      if (!suspension.projectCode) continue; // skip if no project code
+
+      // Query project by projectCode
+      const projectQuery = query(
+        collection(db, "projects"),
+        where("projectCode", "==", suspension.projectCode)
+      );
+      const projectSnap = await getDocs(projectQuery);
+      if (projectSnap.empty) continue; // skip if project not found
+
+      const projectDoc = projectSnap.docs[0];
+      const projectRef = projectDoc.ref;
+
+      // Skip if project already in v-report
+      if (projectDoc.data().projectStatus === "v-report") continue;
+
+      const suspendedAt = suspension.suspendedAt
+        ? new Date(suspension.suspendedAt.seconds * 1000).toLocaleString()
+        : "-";
+
+      // Create task card
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.innerHTML = `
+        <div><strong>Task ID:</strong> ${docSnap.id}</div>
+        <div><strong>Submitted By:</strong> ${suspension.reportedByName || "-"}</div>
+        <div><strong>Project Code:</strong> ${suspension.projectCode || "-"}</div>
+        <div><strong>Reason:</strong> ${suspension.reason || "-"}</div>
+        <div><strong>Link:</strong> <a href="${suspension.link || '#'}" target="_blank">View</a></div>
+        <div><strong>Description:</strong> ${suspension.description || "-"}</div>
+        <div><strong>Suspended At:</strong> ${suspendedAt}</div>
+      `;
+
+      // Buttons
+      const btnContainer = document.createElement("div");
+      btnContainer.className = "task-buttons";
+
+      const confirmBtn = document.createElement("button");
+      confirmBtn.className = "confirm-btn";
+      confirmBtn.textContent = "Confirm";
+
+      const declineBtn = document.createElement("button");
+      declineBtn.className = "decline-btn";
+      declineBtn.textContent = "Decline";
+
+      // Confirm: mark project v-report & hide task
+confirmBtn.addEventListener("click", async () => {
+  try {
+    // 1. Get project info
+    const projectSnap = await getDoc(projectRef);
+    if (!projectSnap.exists()) return alert("Project not found.");
+
+    const projectData = projectSnap.data();
+
+    // 2. Prompt admin for reason
+    const reason = prompt("Enter reason for v-report:");
+    if (!reason) return alert("You must provide a reason.");
+
+    // 3. Mark project as v-report with extra fields
+    await updateDoc(projectRef, {
+      projectStatus: "v-report",
+      reason: reason,
+      reportedAt: new Date(),
+      reportedBy: auth.currentUser.uid,         // UID
+      reportedByName: auth.currentUser.displayName || "Admin", // Name
+      projectId: projectRef.id,
+      link: projectData.link,
+      description: projectData.description
+    });
+
+    // 4. Hide all tasks under this project
+    const tasksQuery = query(
+      collection(db, "tasks"),
+      where("projectId", "==", projectRef.id)
+    );
+    const tasksSnap = await getDocs(tasksQuery);
+    for (const t of tasksSnap.docs) {
+      await updateDoc(t.ref, { status: "hidden" }); // or "confirmed"
+    }
+
+    alert("Project marked v-report. All tasks under it are now hidden until client correction.");
+    card.remove(); // remove this card from view
+  } catch (err) {
+    console.error(err);
+    alert("Error updating project/tasks.");
+  }
+});
+
+      // Decline: make task available
+      declineBtn.addEventListener("click", async () => {
+        try {
+          await updateDoc(doc(db, "tasks", docSnap.id), { status: "Available" });
+          alert("Task marked as available.");
+          card.remove(); // hide card immediately
+        } catch (err) {
+          console.error(err);
+          alert("Error updating task.");
+        }
+      });
+
+      btnContainer.appendChild(confirmBtn);
+      btnContainer.appendChild(declineBtn);
+      card.appendChild(btnContainer);
+
+      tasksContainer.appendChild(card);
+    }
+  }, (err) => {
+    console.error("Error fetching suspended tasks:", err);
+  });
+});
+</script>
+
+</body>
+</html>

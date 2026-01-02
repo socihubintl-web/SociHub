@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Project Tasks Approval</title>
+<style>
+  body { font-family: Poppins, sans-serif; margin: 0; padding: 15px; background: #f4f4f4; }
+  h2 { text-align: center; color: #00cc88; margin-bottom: 20px; }
+  #tasksContainer { display: flex; flex-direction: column; gap: 15px; max-width: 800px; margin: 0 auto; }
+  .task-card { background: #fff; padding: 15px; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+  .task-card h4 { margin: 0 0 5px; color: #00cc88; }
+  .task-card p { margin: 5px 0; font-size: 14px; color: #555; }
+  .task-meta { font-size: 12px; color: #777; margin-bottom: 10px; }
+.task-actions {
+  display: flex;
+  justify-content: space-between; /* spread buttons to edges */
+  gap: 10px;                       /* space between buttons */
+  margin-top: 15px;
+}
+
+.task-actions button {
+  flex: 1;                          /* equal width */
+  padding: 8px 12px;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #fff;
+}
+
+.task-actions .approve-btn {
+  background-color: #00cc88;
+}
+
+.task-actions .reject-btn {
+  background-color: #ff4d4f;
+}
+  a.file-link { color: #00cc88; text-decoration: underline; font-size: 14px; }
+</style>
+</head>
+<body>
+<h2>Pending Tasks</h2>
+<div id="tasksContainer">Loading tasks...</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, getDoc, writeBatch, updateDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {  
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",  
+  authDomain: "socihub-a2731.firebaseapp.com",  
+  projectId: "socihub-a2731",  
+  storageBucket: "socihub-a2731.firebasestorage.app",  
+  messagingSenderId: "815252223754",  
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",  
+  measurementId: "G-KXW58D7RGM"  
+}; 
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const tasksContainer = document.getElementById("tasksContainer");
+
+// Get projectId from URL
+const params = new URLSearchParams(window.location.search);
+const projectId = params.get("projectId");
+if (!projectId) tasksContainer.innerHTML = "<p>Project not found</p>";
+
+// Auth check
+onAuthStateChanged(auth, (user) => {
+  if (!user) return window.location.href = "1page.html";
+
+  const tasksQuery = query(
+    collection(db, "tasks"),
+    where("projectId", "==", projectId),
+    where("status", "==", "Pending")
+  );
+
+  onSnapshot(tasksQuery, (snapshot) => {
+    tasksContainer.innerHTML = "";
+
+    if (snapshot.empty) {
+      tasksContainer.innerHTML = "<p>No pending tasks.</p>";
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const task = docSnap.data();
+      const taskId = docSnap.id;
+      const submittedAt = task.submission?.submittedAt?.toDate
+        ? task.submission.submittedAt.toDate().toLocaleString()
+        : "-";
+
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.innerHTML = `
+        <h4>${task.title}</h4>
+        <p>${task.description}</p>
+        <p class="task-meta">Submitted by: <strong>${task.submission?.submittedByName || 'Unknown'}</strong> | At: ${submittedAt}</p>
+        <p><a class="file-link" href="${task.submission?.fileURL || '#'}" target="_blank">View Submission</a></p>
+        <div class="task-actions">
+          <button class="approve-btn">Approve</button>
+          <button class="reject-btn">Reject</button>
+        </div>
+      `;
+
+      // Approve
+card.querySelector(".approve-btn").addEventListener("click", async () => {
+  try {
+    const taskRef = doc(db, "tasks", taskId);
+    const taskSnap = await getDoc(taskRef);
+
+    if (!taskSnap.exists()) throw new Error("Task not found");
+
+    const taskData = taskSnap.data();
+    const reward   = Number(taskData.reward || 0);
+    const adminId  = taskData.adminId;
+    const earnerId = taskData.submission?.submittedBy;
+
+    if (!adminId || !earnerId) throw new Error("Admin or earner missing");
+    if (reward <= 0) throw new Error("Invalid reward amount");
+
+    const adminRef  = doc(db, "users", adminId);
+    const earnerRef = doc(db, "users", earnerId);
+
+    const [adminSnap, earnerSnap] = await Promise.all([
+      getDoc(adminRef),
+      getDoc(earnerRef)
+    ]);
+
+    if (!adminSnap.exists() || !earnerSnap.exists()) 
+      throw new Error("User account not found");
+
+    const adminBalance  = Number(adminSnap.data().balance || 0);
+    const earnerBalance = Number(earnerSnap.data().balance || 0);
+
+    if (adminBalance < reward) throw new Error("Admin has insufficient balance");
+
+    /* ===== Batch transaction ===== */
+    const batch = writeBatch(db);
+
+    batch.update(taskRef, {
+      status: "Completed",
+      approvedAt: new Date(),
+      approvedBy: adminId
+    });
+
+    batch.update(adminRef, { balance: adminBalance - reward });
+    batch.update(earnerRef, { balance: earnerBalance + reward });
+
+    await batch.commit();
+
+    alert("Task approved and reward transferred successfully!");
+  } catch (err) {
+    console.error("Approve task error:", err);
+    alert(err.message);
+  }
+});
+
+      // Reject
+      card.querySelector(".reject-btn").addEventListener("click", async () => {
+        try {
+          await updateDoc(doc(db, "tasks", taskId), { status: "rejected" });
+          alert("Task rejected");
+        } catch (err) {
+          console.error("Reject error:", err);
+        }
+      });
+
+      tasksContainer.appendChild(card);
+    });
+  }, (err) => {
+    console.error("Error fetching tasks:", err);
+    tasksContainer.innerHTML = "<p>Unable to load tasks. Check permissions.</p>";
+  });
+});
+</script>
+<!-- <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+const tasksContainer = document.getElementById("tasksContainer");
+
+// Get projectId from URL
+const params = new URLSearchParams(window.location.search);
+const projectId = params.get("projectId");
+if (!projectId) tasksContainer.innerHTML = "<p>Project not found</p>";
+
+// Auth check
+onAuthStateChanged(auth, (user) => {
+  if (!user) return window.location.href = "1page.html";
+
+  const tasksQuery = query(
+    collection(db, "tasks"),
+    where("projectId", "==", projectId),
+    where("status", "==", "Pending")
+  );
+
+  onSnapshot(tasksQuery, (snapshot) => {
+    tasksContainer.innerHTML = "";
+
+    if (snapshot.empty) {
+      tasksContainer.innerHTML = "<p>No pending tasks.</p>";
+      return;
+    }
+
+    snapshot.forEach(docSnap => {
+      const task = docSnap.data();
+      const taskId = docSnap.id;
+      const submittedAt = task.submission?.submittedAt?.toDate
+        ? task.submission.submittedAt.toDate().toLocaleString()
+        : "-";
+
+      const card = document.createElement("div");
+      card.className = "task-card";
+      card.innerHTML = `
+        <h4>${task.title}</h4>
+        <p>${task.description}</p>
+        <p class="task-meta">Submitted by: <strong>${task.submission?.submittedByName || 'Unknown'}</strong> | At: ${submittedAt}</p>
+        <p><a class="file-link" href="${task.submission?.fileURL || '#'}" target="_blank">View Submission</a></p>
+        <div class="task-actions">
+          <button class="approve-btn">Approve</button>
+          <button class="reject-btn">Reject</button>
+        </div>
+      `;
+
+      // Approve
+      card.querySelector(".approve-btn").addEventListener("click", async () => {
+        try {
+          await updateDoc(doc(db, "tasks", taskId), { status: "Completed" });
+          alert("Task approved");
+        } catch (err) {
+          console.error("Approve error:", err);
+        }
+      });
+
+      // Reject
+card.querySelector(".reject-btn").addEventListener("click", async () => {
+  try {
+    const taskRef = doc(db, "tasks", taskId);
+    const submittedBy = task.submission?.submittedBy;
+    if (!submittedBy) return alert("Cannot flag: submitter unknown");
+    
+    const userRef = doc(db, "users", submittedBy);
+
+    // 1. Mark task as flagged
+    await updateDoc(taskRef, { status: "flagged" });
+
+    // 2. Read user stats
+    const userSnap = await getDoc(userRef);
+    const currentFlagged = userSnap.data()?.stats?.flagged || 0;
+    const newFlagged = currentFlagged + 33;
+
+    // 3. Update flagged + ban if ≥ 99
+    await updateDoc(userRef, {
+      "stats.flagged": newFlagged,
+      ...(newFlagged >= 99 && { accountStatus: "banned" })
+    });
+
+    alert(newFlagged >= 99 ? "User is now banned!" : "Task rejected and flagged");
+
+  } catch (err) {
+    console.error("Reject error:", err);
+    alert("Failed to reject task");
+  }
+});
+
+      tasksContainer.appendChild(card);
+    });
+  }, (err) => {
+    console.error("Error fetching tasks:", err);
+    tasksContainer.innerHTML = "<p>Unable to load tasks. Check permissions.</p>";
+  });
+});
+</script> -->
+</body>
+</html>

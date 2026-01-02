@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SociHub</title>
+<style>
+/* Reset & base */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Poppins, sans-serif;
+}
+  body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    background-color: #f4f4f4;
+    color: #1a1a1a;
+  }
+
+/* Dark mode */
+body.dark {
+  background-color: #0f172a;
+  color: #fff;
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #00cc88;
+  color: #fff;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column; /* STACK top + bottom */
+  transition: top 0.2s ease;
+}
+
+.header.hidden {
+  top: -130px;
+}
+
+/* TOP ROW */
+.header-top {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+}
+
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 1000;
+}
+
+.menu-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* BOTTOM NAV */
+.header-nav {
+  display: flex;
+  justify-content: center;
+  gap: 16px;
+  font-size: 13px;
+}
+
+.header-nav a {
+  color: #fff;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.header-nav a:hover {
+  text-decoration: underline;
+}
+
+/* DROPDOWN MENU */
+.header-menu {
+  font-size: 12px;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  text-align:left;
+  width: 100%;
+  background: #00cc88;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.3s ease;
+  display: flex;
+  flex-direction: column;
+}
+
+.header.open .header-menu {
+  max-height: 200px;
+}
+
+.header-menu a {
+    text-decoration: none;
+  padding: 14px 20px;
+  color: #0f172a;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+body.dark .header-menu a {
+  color: #fff;
+}
+
+.header-menu a:hover {
+  background: rgba(0,0,0,0.05);
+}
+
+.header-menu a.theme-toggle {
+  cursor: pointer;
+}
+
+
+
+
+  header {
+    font-size: 10px;
+    color: red;
+    padding: 20px;
+    margin-bottom: 100px;
+    text-align: center;
+    display: flex;
+    position: sticky;
+    top: 40px;
+    z-index: 1000;
+  }
+
+
+
+  nav {
+    margin-top: 10px;
+  }
+
+  nav a {
+    color: #fff;
+    margin: 0 15px;
+    text-decoration: none;
+    font-weight: 500;
+  }
+
+  nav a:hover {
+    text-decoration: underline;
+  }
+
+/* Main content */
+.main {
+  max-width: 900px;
+  margin: 80px auto 20px; /* leave space under header */
+  padding: 0 20px;
+}
+
+.main h2 {
+  font-size: 1.8rem;
+  margin-bottom: 16px;
+  color: #00cc88;
+}
+
+.main p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 12px;
+}
+  main {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 0 20px;
+  }
+
+  section {
+    margin-bottom: 40px;
+  }
+
+  h2 {
+    color: #00cc88;
+    margin-bottom: 10px;
+  }
+
+  p {
+    margin-bottom: 15px;
+    font-size: 1rem;
+  }
+
+  ul {
+    margin-left: 20px;
+    margin-bottom: 15px;
+  }
+
+  footer {
+    background-color: #222;
+    color: #fff;
+    padding: 30px 20px;
+    text-align: center;
+  }
+  button {
+    background-color: #00cc88;
+    padding: 5px 0;
+    border:none;
+    width:20%;
+    color:#fff;
+    border-radius:8px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+<div class="header">
+  <!-- top row -->
+  <div class="header-top">
+    <h1>SociHub</h1>
+    <div class="menu-icon" id="menuToggle">&#9776;</div>
+  </div>
+
+  <!-- bottom row -->
+  <nav class="header-nav">
+    <a href="#overview">Overview</a>
+    <a href="#clients">Clients</a>
+    <a href="#earners">Earners</a>
+    <a href="#admins">Admins</a>
+    <a href="#features">Features</a>
+    <a href="#get-started">Get Started</a>
+  </nav>
+
+  <!-- dropdown menu -->
+  <div class="header-menu" id="headerMenu">
+    <a href="#">Profile</a>
+    <a href="#">FAQ</a>
+    <a class="theme-toggle">Theme</a>
+    <a href="#" class="logout">Logout</a>
+  </div>
+</div>
+</header>
+
+<main>
+  <section id="overview">
+    <h2>Welcome to SociHub</h2>
+    <p>SociHub is a revolutionary platform designed to connect clients, earners, and administrators in a seamless and secure environment. Our goal is to make task management, project assignment, and reward distribution as easy as possible while ensuring real-time updates, offline support, and full accountability for all participants. Whether you are looking to complete tasks, manage projects, or earn rewards, SociHub has you covered.</p>
+    <p>With SociHub, users can navigate projects with clarity, assign tasks to specific earners, and track progress efficiently. Our design emphasizes usability and accessibility, allowing everyone from beginners to experienced professionals to engage effortlessly with the platform. The system ensures that each user knows their responsibilities, the rewards at stake, and the status of ongoing projects at a glance.</p>
+    <p>Offline persistence allows projects to continue even in low connectivity environments, making SociHub perfect for both urban and remote users. Our smart notifications keep participants informed instantly when tasks are created, completed, or updated.</p>
+  </section>
+
+  <section id="clients">
+    <h2>Clients</h2>
+    <p>Clients are the heart of SociHub. They create projects, define tasks, set rewards, and monitor overall progress. With SociHub, clients can:</p>
+    <ul>
+      <li>Create new projects with custom titles, descriptions, and links.</li>
+      <li>Set specific rewards for each task and allocate them to earners.</li>
+      <li>Assign multiple tasks simultaneously to multiple earners.</li>
+      <li>Track task completion in real-time with an intuitive progress dashboard.</li>
+      <li>Receive notifications when tasks are completed or delayed.</li>
+      <li>Manage project budgets and fees transparently.</li>
+    </ul>
+    <p>The client interface is simple but powerful, allowing users to generate unique codes for projects and tasks, monitor engagement levels, and adjust assignments when needed. Clients no longer have to manually follow up with workers—everything is automated and visible in one place.</p>
+<button class="role-btn" onclick="goToSignup('client')">Client</button>
+  </section>
+
+  <section id="earners">
+    <h2>Earners</h2>
+    <p>Earners are users who complete tasks and earn rewards. SociHub makes it easy for earners to find, accept, and complete tasks efficiently. Key features include:</p>
+    <ul>
+      <li>Access to available tasks filtered by role, skill, or interest.</li>
+      <li>Clear task descriptions, reward information, and deadlines.</li>
+      <li>Real-time progress updates for each task undertaken.</li>
+      <li>Notifications when new projects or tasks match their profile.</li>
+      <li>Secure reward distribution directly after task approval.</li>
+      <li>Offline-friendly functionality so tasks can be logged even without an internet connection, syncing automatically when online.</li>
+    </ul>
+    <p>Earners can track all tasks assigned to them, view completed and pending tasks, and monitor their total earnings over time. This transparency ensures confidence and motivation, fostering a productive environment.</p>
+    <button class="role-btn" onclick="goToSignup('earner')">Earner</button>
+  </section>
+
+  <section id="admins">
+    <h2>Admins</h2>
+    <p>Admins oversee the platform and ensure smooth operation for both clients and earners. Responsibilities include:</p>
+    <ul>
+      <li>Monitoring all ongoing projects and tasks.</li>
+      <li>Verifying task completion and resolving disputes.</li>
+      <li>Managing users, roles, and permissions across the platform.</li>
+      <li>Tracking financial flows and ensuring project fees are properly distributed.</li>
+      <li>Generating reports on performance, engagement, and earnings.</li>
+    </ul>
+    <p>Admins have access to comprehensive dashboards and analytics tools that allow them to make informed decisions and maintain platform integrity. With SociHub, administrative tasks are simplified without compromising control or security.</p>
+    <button class="role-btn" onclick="goToSignup('admin')" style="display:none;">Admin</button>
+  </section>
+
+  <section id="features">
+    <h2>Key Features</h2>
+    <p>SociHub is packed with powerful features to improve efficiency and user experience:</p>
+    <ul>
+      <li>Real-time notifications for task updates and project changes.</li>
+      <li>Offline support with automatic syncing when connectivity returns.</li>
+      <li>Unique codes for projects and tasks for easy tracking.</li>
+      <li>Dynamic dashboards for clients, earners, and admins.</li>
+      <li>Secure reward allocation and transaction tracking.</li>
+      <li>Customizable project settings and task assignments.</li>
+      <li>Progress tracking with visual indicators and statistics.</li>
+      <li>Easy-to-use interface that works across web and mobile.</li>
+      <li>Support for multiple roles with clearly defined permissions.</li>
+    </ul>
+    <p>Every feature is designed to save time, reduce errors, and provide clarity. SociHub empowers users to focus on meaningful work, not administrative headaches.</p>
+  </section>
+
+  <section id="get-started">
+    <h2>Get Started with SociHub</h2>
+    <p>Joining SociHub is simple. Whether you are a client, earner, or admin, getting started only takes a few minutes:</p>
+    <ul>
+      <li>Select your role during signup: Client, Earner, Admin, or Owner.</li>
+      <li>Clients can immediately create projects and define tasks.</li>
+      <li>Earners can browse tasks and start earning rewards.</li>
+      <li>Admins can review, monitor, and manage platform activities.</li>
+    </ul>
+    <p>SociHub is built for scalability, security, and convenience. With a simple signup, intuitive dashboards, and real-time updates, users can maximize productivity while staying informed and motivated.</p>
+    <p>Experience the future of task management and reward distribution. Connect with others, engage meaningfully, and earn efficiently—SociHub makes it all possible.</p>
+  </section>
+</main>
+
+<footer>
+  &copy; 2025 SociHub. All Rights Reserved.
+</footer>
+<script>
+  const menuToggle = document.getElementById("menuToggle");
+const header = document.querySelector(".header");
+const headerMenu = document.getElementById("headerMenu");
+
+menuToggle.addEventListener("click", () => {
+  header.classList.toggle("open");
+});
+
+// Close menu if clicked outside
+document.addEventListener("click", e => {
+  if (!header.contains(e.target)) {
+    header.classList.remove("open");
+  }
+});
+
+// Theme toggle
+const themeToggle = document.querySelector(".theme-toggle");
+
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  localStorage.setItem("theme", document.body.classList.contains("dark") ? "dark" : "light");
+});
+
+// Load saved theme
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+}
+window.addEventListener("DOMContentLoaded", () => {
+  // Only scroll if URL has a hash (like #earners)
+  const hash = window.location.hash;
+  if (hash) {
+    const target = document.querySelector(hash);
+    if (target) {
+      const yOffset = -60; // adjust for fixed header
+      const y = target.getBoundingClientRect().top + window.pageYOffset + yOffset;
+      window.scrollTo({ top: y, behavior: "smooth" });
+    }
+  }
+});
+  function goToSignup(role) {
+    // Pass role in URL query
+    window.location.href = `signup.html?role=${role}`;
+  }
+  let lastScroll = window.pageYOffset;
+let hideTimeout;
+
+window.addEventListener("scroll", () => {
+  const currentScroll = window.pageYOffset;
+
+  // Scrolling UP → start 2-sec timer to hide header
+  if (currentScroll < lastScroll) {
+    clearTimeout(setTimeout);
+    hideTimeout = setTimeout(() => {
+      header.classList.remove("hidden");
+    }, 100);
+  }
+
+  // Scrolling DOWN → show header immediately
+  else if (currentScroll > lastScroll) {
+    clearTimeout(setTimeout);
+    hideTimeout = setTimeout(() => {
+      header.classList.add("hidden");
+    }, 200);
+  }
+
+  lastScroll = currentScroll;
+});
+</script>
+</body>
+</html>

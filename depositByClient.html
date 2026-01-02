@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Deposit Upload (Cloudinary + Firestore)</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  input, button { padding: 8px 12px; margin-top: 5px; }
+  img { max-width: 300px; margin-top: 10px; border: 1px solid #ccc; }
+  #log { background: #f0f0f0; padding: 10px; max-height: 200px; overflow-y: auto; margin-top: 10px; }
+</style>
+</head>
+<body>
+
+<h1>Deposit Upload</h1>
+<input id="amount" type="number" placeholder="Enter amount"><br><br>
+<input type="file" id="proof" accept="image/*"><br><br>
+<button id="uploadBtn">Upload Deposit</button>
+
+<h3>Preview:</h3>
+<img id="preview" alt="Image Preview">
+<pre id="log"></pre>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.appspot.com",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",
+  measurementId: "G-KXW58D7RGM"
+};
+
+// Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// DOM elements
+const fileInput = document.getElementById("proof");
+const uploadBtn = document.getElementById("uploadBtn");
+const preview = document.getElementById("preview");
+const logEl = document.getElementById("log");
+const amountInput = document.getElementById("amount");
+
+function logMsg(msg){
+  console.log(msg);
+  logEl.textContent += msg + "\n";
+}
+async function uploadToCloudinary(file){
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", "deposit_preset"); // unsigned preset
+
+  const res = await fetch("https://api.cloudinary.com/v1_1/dp0qteuda/upload", {
+    method: "POST",
+    body: formData
+  });
+
+  const data = await res.json();
+  console.log("Cloudinary response:", data);
+
+  if(data.error){
+    throw new Error("Cloudinary upload failed: " + data.error.message);
+  }
+  if(!data.secure_url){
+    throw new Error("Cloudinary did not return secure_url");
+  }
+
+  return data.secure_url;
+}
+// Save deposit reference to Firestore
+async function saveDepositReference(userId, transactionId, amount, fileUrl){
+  const docRef = await addDoc(collection(db,"deposits"), {
+    userId,
+    transactionId,
+    amount,
+    fileUrl,
+    status: "pending",
+    createdAt: serverTimestamp()
+  });
+  logMsg("Saved Firestore document: " + docRef.id);
+}
+
+onAuthStateChanged(auth, (user)=>{
+  if(!user){
+    logMsg("No user logged in!");
+    return;
+  }
+  logMsg("User logged in: " + user.uid);
+
+  uploadBtn.addEventListener("click", async ()=>{
+    if(!fileInput.files.length){
+      logMsg("Please select a file!");
+      return;
+    }
+    if(!amountInput.value){
+      logMsg("Please enter an amount!");
+      return;
+    }
+
+    const file = fileInput.files[0];
+    preview.src = URL.createObjectURL(file); // temporary preview
+    const transactionId = "TX-" + Date.now();
+    const amount = Number(amountInput.value);
+
+    try{
+      const fileUrl = await uploadToCloudinary(file);
+      await saveDepositReference(user.uid, transactionId, amount, fileUrl);
+      logMsg("✅ Deposit upload complete!");
+    }catch(err){
+      console.error(err);
+      logMsg("❌ Error: " + err.message);
+    }
+  });
+});
+</script>
+</body>
+</html>
+

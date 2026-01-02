@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SociHub Client</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+body { font-family: Poppins, sans-serif; margin:0; padding:15px; background:#f4f4f4; }
+h1 { text-align:center; font-size:2.3rem; margin-top:20px; color:#00cc88; position:relative; top:-35px; right:15px; width:100%; padding:10px; border-radius:9px; box-shadow:0 0 3px rgba(0,0,0,0.01); }
+h1 i{ position:absolute; left:9px; margin-left:8px; bottom:19px; font-size:20px; cursor:pointer; }
+.welcome { font-size:14px; font-weight:200; margin-bottom:15px; }
+.balance-card { background:#fff; padding:15px; border-radius:12px; box-shadow:0 2px 5px rgba(0,0,0,0.1); margin-bottom:30px; }
+.balance-header { font-size:18px; font-weight:600; }
+.balance-amount { font-size:24px; font-weight:700; margin:10px 0; }
+.withdraw-btn, .transcation-history { padding:10px 18px; border-radius:5px; cursor:pointer; font-size:10px; border:none; margin-right:5px; }
+.withdraw-btn { background:#00cc88; color:#fff; }
+.transcation-history { background:#fff; color:#00cc88; border:1px solid #00cc88; }
+.stats-section { margin-bottom:30px; }
+.stats-wrapper { margin-top:50px; margin-bottom:60px; display:flex; gap:10px; }
+.percent-labels { position:relative; left:0; bottom:25px; display:flex; flex-direction:column; justify-content:space-between; gap:6px; height:180px; font-size:10px; color:#666; }
+.stats-area { position:relative; width:100%; }
+.horizontal-lines { position:absolute; left:0; top:-17px; width:100%; height:180px; display:flex; flex-direction:column; justify-content:space-between; pointer-events:none; }
+.horizontal-lines div { width:100%; height:1px; background:#ccc; opacity:0.4; }
+.stats-bars { display:flex; justify-content:space-between; align-items:flex-end; height:180px; padding-left:10px; }
+.bar-container { text-align:center; }
+.bar { width:20px; border-radius:6px 6px 0 0; height:0; transition:height 0.5s ease; }
+.bar.available { background:blue; }
+.bar.completed { background:#00cc88; }
+.bar.rejected { background:red; }
+.bar.pending { background:#e8d400b7; }
+.bar.flagged { background:black; }
+.tasks-container { max-height:550px; overflow-y:auto; padding:5px; display:flex; flex-direction:column; gap:15px; margin-top:20px; margin-bottom:30px; }
+.task-card { background:#fff; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.1); padding:15px; transition: transform 0.2s ease, box-shadow 0.2s ease; position:relative; }
+.task-card:hover { transform:translateY(-3px); box-shadow:0 4px 12px rgba(0,0,0,0.15); }
+.task-card h3 { margin:0 0 10px 0; color:#00cc88; font-size:1.2rem; }
+.task-card p { font-size:14px; margin:5px 0; }
+.task-card a.task-link { display:inline-block; color:#0066cc; text-decoration:underline; font-size:14px; }
+.complete-task-btn { background:#00cc88; color:#fff; border:none; padding:10px 15px; border-radius:8px; cursor:pointer; font-size:14px; margin-top:10px; width:100%; }
+.complete-task-btn:disabled { opacity:0.6; cursor:not-allowed; }
+.task-status { position:absolute; top:12px; right:12px; padding:3px 8px; font-size:12px; border-radius:8px; color:#fff; }
+.task-status.available { background:blue; }
+.task-status.completed { background:#5cb85c; }
+.task-status.rejected { background:#d9534f; }
+.task-status.flagged { background:black; }
+#projectForm { background:#fff; padding:15px; border-radius:12px; margin-bottom:30px; box-shadow:0 2px 8px rgba(0,0,0,0.1); }
+#projectForm input, #projectForm textarea { width:100%; padding:8px; margin-bottom:10px; border-radius:6px; border:1px solid #ccc; }
+#projectForm button { width:100%; background:#00cc88; color:#fff; padding:10px; border:none; border-radius:8px; cursor:pointer; }
+</style>
+</head>
+<body>
+
+<h1>SociHub <i class="fas fa-bars" id="openMenu"></i></h1>
+
+<div class="welcome">Welcome, <span id="Username">user</span> 👋</div>
+
+<div class="balance-card">
+  <div class="balance-header">Balance</div>
+  <div class="balance-amount" id="balance">₦0.00</div>
+  <button class="transcation-history">Transcations</button>
+  <button class="withdraw-btn">Withdraw</button>
+  <div style="clear:both;"></div>
+</div>
+
+<!-- Project Creation Form -->
+<div id="projectForm">
+  <h3>Create New Project</h3>
+  <input type="text" id="projectTitle" placeholder="Project Title">
+  <textarea id="projectDesc" placeholder="Project Description"></textarea>
+  <input type="number" id="projectReward" placeholder="Reward per user">
+  <input type="number" id="projectEngagers" placeholder="Number of Engagers">
+  <input type="url" id="projectLink" placeholder="Task Link">
+  <button id="createProjectBtn">Create Project</button>
+</div>
+
+<div class="stats-section">
+  <h3>Task Statistics</h3>
+  <div class="stats-wrapper">
+    <div class="percent-labels">
+      <div>100%</div><div>90%</div><div>80%</div><div>70%</div><div>60%</div>
+      <div>50%</div><div>40%</div><div>30%</div><div>20%</div><div>10%</div><div>0%</div>
+    </div>
+    <div class="stats-area">
+      <div class="horizontal-lines">
+        <div></div><div></div><div></div><div></div><div></div>
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+      </div>
+      <div class="stats-bars">
+        <div class="bar-container"><div class="bar available"></div><div class="bar-label">Available</div></div>
+        <div class="bar-container"><div class="bar completed"></div><div class="bar-label">Completed</div></div>
+        <div class="bar-container"><div class="bar rejected"></div><div class="bar-label">Rejected</div></div>
+        <div class="bar-container"><div class="bar pending"></div><div class="bar-label">Pending</div></div>
+        <div class="bar-container"><div class="bar flagged"></div><div class="bar-label">Flagged</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<h3>Available Tasks</h3>
+<div id="tasksContainer" class="tasks-container"></div>
+
+<script type="module">
+// ---------------- FIREBASE ----------------
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, doc, setDoc, updateDoc, getDoc, query, where, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.firebasestorage.app",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",
+  measurementId: "G-KXW58D7RGM"
+};
+
+const REQUIRED_ROLE = "client";
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// DOM
+const usernameDisplay = document.getElementById("Username");
+const balanceDisplay = document.getElementById("balance");
+const tasksContainer = document.getElementById("tasksContainer");
+const createProjectBtn = document.getElementById("createProjectBtn");
+const barElements = {
+  available: document.querySelector(".bar.available"),
+  completed: document.querySelector(".bar.completed"),
+  rejected: document.querySelector(".bar.rejected"),
+  pending: document.querySelector(".bar.pending"),
+  flagged: document.querySelector(".bar.flagged")
+};
+const MAX_BAR_HEIGHT = 180;
+
+// AUTH STATE
+onAuthStateChanged(auth, async user => {
+  if (!user) return window.location.href = "1page.html";
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+  if (!snap.exists()) return window.location.href="no_access.html";
+  const data = snap.data();
+  if (data.role !== REQUIRED_ROLE) return window.location.href="no_access.html";
+  usernameDisplay.textContent = data.name || "Client";
+  balanceDisplay.textContent = "₦" + (data.balance ?? 0).toFixed(2);
+  // Initialize stats if missing
+  if(!data.stats) {
+    const defaultStats = {available:0, completed:0, rejected:0, pending:0, flagged:0};
+    await setDoc(userRef, {stats:defaultStats},{merge:true});
+    data.stats = defaultStats;
+  }
+  Object.keys(barElements).forEach(stat => {
+    barElements[stat].style.height = (data.stats?.[stat]??0)/100*MAX_BAR_HEIGHT + "px";
+  });
+  loadTasks();
+});
+
+// CREATE PROJECT
+createProjectBtn.addEventListener("click", async ()=>{
+  const title = document.getElementById("projectTitle").value;
+  const desc = document.getElementById("projectDesc").value;
+  const reward = parseFloat(document.getElementById("projectReward").value);
+  const engagers = parseInt(document.getElementById("projectEngagers").value);
+  const link = document.getElementById("projectLink").value;
+  if(!title || !desc || !reward || !engagers || !link) return alert("Fill all fields");
+  try{
+    const projectRef = doc(collection(db,"projects"));
+    await setDoc(projectRef,{title,desc,reward,engagers,link,createdAt:new Date()});
+    for(let i=0;i<engagers;i++){
+      const taskRef = doc(collection(db,"tasks"));
+      await setDoc(taskRef,{projectId:projectRef.id,title,description:desc,reward,link,status:"Available",createdAt:new Date()});
+    }
+    alert("Project created successfully!");
+    document.getElementById("projectTitle").value="";
+    document.getElementById("projectDesc").value="";
+    document.getElementById("projectReward").value="";
+    document.getElementById("projectEngagers").value="";
+    document.getElementById("projectLink").value="";
+  }catch(err){ console.error(err); alert("Failed to create project"); }
+});
+
+// LOAD TASKS
+function createTaskCard(task){
+  const div = document.createElement("div");
+  div.classList.add("task-card");
+  div.innerHTML=`
+    <span class="task-status ${task.status.toLowerCase()}">${task.status}</span>
+    <h3>${task.title}</h3>
+    <p>${task.description}</p>
+    <p><strong>Reward:</strong> ₦${task.reward}</p>
+    <a href="${task.link}" target="_blank" class="task-link">Open Post</a>
+  `;
+  tasksContainer.appendChild(div);
+}
+
+function loadTasks(){
+  const q = query(collection(db,"tasks"), where("status","in",["Available","Completed"]));
+  onSnapshot(q, snap=>{
+    tasksContainer.innerHTML="";
+    snap.forEach(docSnap=> createTaskCard({...docSnap.data(),id:docSnap.id}));
+    const counts = {available:0, completed:0, rejected:0, pending:0, flagged:0};
+    snap.forEach(docSnap=>{
+      const s = docSnap.data().status.toLowerCase();
+      if(counts[s]!==undefined) counts[s]++;
+    });
+    Object.keys(barElements).forEach(stat=>{
+      barElements[stat].style.height = Math.min(counts[stat],100)/100*MAX_BAR_HEIGHT + "px";
+    });
+  });
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign Up</title>
+<style>
+  * { box-sizing: border-box; }
+  body, html { margin:0; padding:0; height:100%; font-family:Arial,sans-serif; background:#0f172a; color:#fff; }
+  .container { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  h1 { text-align:center; margin:30px 0 0; flex-shrink:0; font-weight:1000; font-size: 1.7rem; }
+
+  .slider { display:flex; width:400%; transition:transform 0.4s ease; height: calc(100vh - 60px); }
+  .step { min-width:25%; height:100%; display:flex; flex-direction:column; justify-content:space-between; padding:20px; }
+  
+  .inputs { display:flex; flex-direction:column; gap:0; margin-top:20px; }
+  .inputs input, .inputs textarea { width:100%; margin:5px 0; padding:15px; border-radius:10px; border:none; font-size:16px; background:#f3f3f3; color:#000; outline:none; }
+  textarea { resize:none; height:120px; }
+
+  .step-btn { background:#00cc99; color:#000; border:none; padding:16px; font-size:16px; border-radius:12px; cursor:pointer; margin-bottom:20px; }
+  .step-btn:hover { transform:scale(1.05); }
+
+  .password-field { position:relative; display:flex; flex-direction:column; }
+  .password-field .eye { position:absolute; right:15px; top:50%; transform:translateY(-50%); cursor:pointer; }
+
+.error-text{
+  color:#ff5c5c;
+  font-size:13px;
+  margin-top:4px;
+  min-height:16px;
+}
+
+.step-btn:disabled{
+  opacity:.5;
+  cursor:not-allowed;
+  transform:none;
+}
+
+  #verifyEmailSection { display:none; text-align:center; padding:40px; }
+  #resendBtn { background:#00cc99; color:#000; border:none; padding:12px; border-radius:8px; cursor:pointer; margin-top:15px; }
+  
+  label {
+    font-size: 17px;
+    font-weight:bold;
+    color:#00cc88;
+    margin:10px 0;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1 id="roleTitle">Sign Up</h1>
+
+  <div class="slider" id="slider">
+
+    <!-- STEP 1: EMAIL -->
+    <section class="step">
+      <div class="inputs">
+     <label for="email">Email address</label>
+        <input type="email" id="email" placeholder="Email address" required>
+        <div class="error-text"></div>
+      </div>
+      <button class="step-btn" id="next1">Continue</button>
+    </section>
+
+    <!-- STEP 2: FULL NAME -->
+    <section class="step">
+      <div class="inputs">
+     <label for="email">Full name</label>
+        <input type="text" id="name" placeholder="Geo Raph" required>
+        <div class="error-text"></div>
+      </div>
+      <button class="step-btn" id="next2">Continue</button>
+    </section>
+
+    <section class="step">
+      <div class="inputs">
+             <label for="email">First name & unique number</label>
+        <input type="text" id="nickName" placeholder="Geo001" required>
+        <div class="error-text"></div>
+      </div>
+      <button class="step-btn" id="next2.5">Continue</button>
+    </section>
+
+    <!-- STEP 3: BIO (ADMIN ONLY) -->
+    <section class="step" id="bioStep">
+      <div class="inputs">
+     <label for="email">Bio</label>
+        <textarea id="bio" placeholder="Enter a description that will make clients choose you!"></textarea>
+        <div class="error-text"></div>
+      </div>
+      <button class="step-btn" id="next3">Continue</button>
+    </section>
+
+    <!-- STEP 4: PASSWORD -->
+    <section class="step">
+      <div class="inputs">
+        <div class="password-field">
+      <label for="email">Password</label>
+          <input type="password" id="password" placeholder="Password (Ab.i8888)" required>
+          <div class="error-text"></div>
+          <span class="eye" data-target="password">👁</span>
+        </div>
+        <div class="password-field">
+          <input type="password" id="confirmPassword" placeholder="Confirm password" required>
+          <div class="error-text"></div>
+          <span class="eye" data-target="confirmPassword">👁</span>
+        </div>
+      </div>
+      <button class="step-btn" id="signupBtn">Sign Up</button>
+    </section>
+
+  </div>
+</div>
+
+<div id="verifyEmailSection">
+  <h2>Verify Your Email</h2>
+  <p>An email verification has been sent to <span id="userEmail"></span>.</p>
+  <p>Please check your inbox and click the verification link.</p>
+  <button id="resendBtn"><a href="login.html">Login</a></button>
+  <p id="resendMsg" style="color:red; margin-top:10px;"></p>
+</div>
+</body>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+  sendEmailVerification
+} from "https://www.gstatic.com/firebasejs/12.5.0/firebase-auth.js";
+import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-firestore.js";
+
+/* ------------------ FIREBASE ------------------ */
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.firebasestorage.app",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3"
+};
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ------------------ ROLE ------------------ */
+const params = new URLSearchParams(window.location.search);
+const role = params.get("role") || "admin";
+document.getElementById("roleTitle").innerText = `Sign Up as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+
+/* ------------------ SLIDER ------------------ */
+const slider = document.getElementById("slider");
+let step = 0;
+
+// Conditional Bio step for admins
+const bioStep = document.getElementById("bioStep");
+if (role !== "admin" && bioStep) bioStep.remove();
+
+function goToStep(i){
+  step = i;
+  slider.style.transform = `translateX(-${step * 25}%)`;
+
+  // ✅ Push this step into browser history
+  history.pushState({ step }, `Step ${step}`, `?role=${role}&step=${step}`);
+}
+
+const inputs = document.querySelectorAll(".inputs input, .inputs textarea");
+
+inputs.forEach(input => {
+  input.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault(); // Stop Enter from submitting or jumping
+    }
+  });
+});
+
+/* ------------------ ERROR HELPERS ------------------ */
+function error(input,msg){ input.nextElementSibling.textContent = msg; }
+function clearError(input){ input.nextElementSibling.textContent = ""; }
+function disable(btn,state){ btn.disabled = state; }
+
+/* ------------------ EMAIL ------------------ */
+const email = document.getElementById("email");
+const next1 = document.getElementById("next1");
+disable(next1,false);
+
+email.oninput = async ()=>{
+  clearError(email); disable(next1,true);
+  const val = email.value.trim();
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val)){
+    error(email,"Invalid email format"); return;
+  }
+  const methods = await fetchSignInMethodsForEmail(auth,val);
+  if(methods.length){ error(email,"Email already in use"); return; }
+  disable(next1,false);
+};
+next1.onclick = ()=>goToStep(1);
+
+/* ------------------ FULL NAME ------------------ */
+const name = document.getElementById("name");
+const next2 = document.getElementById("next2");
+disable(next2,true);
+name.oninput = () => {
+  clearError(name);
+  disable(next2, true);
+
+  const val = name.value.trim();
+  const parts = val.split(" ").filter(p => p.length > 0); // split by spaces and remove empty
+  if (parts.length < 2) {
+    error(name, "Full name is not accepted");
+    return;
+  }
+
+  disable(next2, false); // valid → enable button
+};
+next2.onclick = ()=>goToStep(2);
+
+/* ------------------ NICKNAME ------------------ */
+const nick = document.getElementById("nickName");
+const next25 = document.getElementById("next2.5");
+disable(next25,true);
+nick.oninput = ()=>{
+  clearError(nick); disable(next25,true);
+  if(nick.value.includes(" ")) { error(nick,"No spaces allowed"); return; }
+  if(nick.value.length>12){ error(nick,"Max 12 characters"); return; }
+  disable(next25,false);
+};
+next25.onclick = ()=>goToStep(bioStep?3:4); // skip bio for non-admins
+
+/* ------------------ BIO (ADMIN ONLY) ------------------ */
+const next3 = document.getElementById("next3");
+const bio = document.getElementById("bio");
+if(bio && next3){
+  disable(next3,true);
+  bio.oninput = ()=>{
+    clearError(bio); disable(next3,true);
+    if(bio.value.length<30){ error(bio,"Minimum 30 characters"); return; }
+    disable(next3,false);
+  };
+  next3.onclick = ()=>goToStep(4);
+}
+
+/* ------------------ PASSWORD ------------------ */
+const password = document.getElementById("password");
+const confirm = document.getElementById("confirmPassword");
+const signupBtn = document.getElementById("signupBtn");
+disable(signupBtn,true);
+
+function validPassword(p){
+  return (
+    p.length>=8 &&
+    /[A-Z]/.test(p) &&
+    /[a-z]/.test(p) &&
+    /\d/.test(p) &&
+    /[^A-Za-z0-9]/.test(p)
+  );
+}
+function checkPasswords(){
+  clearError(password); clearError(confirm); disable(signupBtn,true);
+  if(!validPassword(password.value)){ error(password,"Weak password"); return; }
+  if(password.value!==confirm.value){ error(confirm,"Passwords do not match"); return; }
+  disable(signupBtn,false);
+}
+password.oninput = checkPasswords;
+confirm.oninput = checkPasswords;
+
+/* ------------------ SIGNUP ------------------ */
+signupBtn.onclick = async ()=>{
+  try{
+    const userCred = await createUserWithEmailAndPassword(auth,email.value.trim(),password.value);
+    await setDoc(doc(db,"users",userCred.user.uid),{
+      email: email.value.trim(),
+      name: name.value.trim(),
+      nickname: nick.value.trim(),
+      bio: bio?.value || "",
+      role: role,
+      createdAt: new Date()
+    });
+    await sendEmailVerification(userCred.user);
+
+    document.querySelector(".container").style.display="none";
+    document.getElementById("verifyEmailSection").style.display="block";
+    document.getElementById("userEmail").textContent = email.value;
+
+  }catch(e){ alert(e.message); console.error(e); }
+};
+
+// Password eye toggle
+const eyes = document.querySelectorAll(".eye");
+eyes.forEach(eye => {
+  eye.addEventListener("click", () => {
+    const targetInput = document.getElementById(eye.dataset.target);
+    if (targetInput.type === "password") {
+      targetInput.type = "text";
+      eye.textContent = "🙈"; // optional: change icon
+    } else {
+      targetInput.type = "password";
+      eye.textContent = "👁"; // reset icon
+    }
+  });
+});
+/* ------------------ POPSTATE HISTORY ------------------ */
+window.addEventListener("popstate", (event)=>{
+  if(event.state && typeof event.state.step !== "undefined"){
+    step = event.state.step;
+    slider.style.transform = `translateX(-${step * 25}%)`;
+  } else {
+    // fallback to first step
+    step = 0;
+    slider.style.transform = `translateX(0%)`;
+    history.replaceState({ step }, "Step 0", `?role=${role}&step=${step}`);
+  }
+});
+
+// Replace initial state on page load
+history.replaceState({ step:0 }, "Step 0", `?role=${role}&step=0`);
+
+function getFriendlyMessage(error) {
+  switch(error.code){
+    case "auth/email-already-in-use":
+      return "This email is already registered. Try another or log in.";
+    case "auth/invalid-email":
+      return "Please enter a valid email address.";
+    case "auth/weak-password":
+      return "Password is too weak. Use at least 8 characters with uppercase, lowercase, number, and symbol.";
+    case "auth/operation-not-allowed":
+      return "Email/password signup is not enabled yet. Contact support.";
+    case "auth/too-many-requests":
+      return "Too many attempts. Please try again later.";
+    default:
+      return "Something went wrong. Please try again.";
+  }
+}
+
+</script>
+</body>
+</html>

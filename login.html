@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SociHub Login</title>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background:  #0f172a;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+    }
+
+    .login-box {
+      position: relative;
+      bottom:200px;
+        background: #0f172a;
+        width: 90%;
+        max-width: 380px;
+        padding: 25px;
+        border-radius: 12px;
+    }
+
+    h1 {
+        margin: 50px 0;
+        text-align: center;
+        color: #fff;
+    }
+
+    .input-group {
+        margin-bottom: 18px;
+        width: 92%;
+    }
+
+    input {
+      background: #edededf3;
+        width: 100%;
+        padding: 12px;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        outline: none;
+        font-size: 15px;
+    }
+
+    #loginBtn {
+      position: relative;
+      top: 300px;
+        width: 100%;
+        padding: 12px;
+        background: #00cc99;
+        border: none;
+        border-radius: 8px;
+        color: white;
+        font-weight: bold;
+        font-size: 17px;
+        cursor: pointer;
+    }
+
+    #loginBtn:active {
+        transform: scale(0.97);
+    }
+
+    .error {
+      position: relative;
+      top: 50px;
+        color: red;
+        font-size: 14px;
+        text-align: center;
+        margin-top: 10px;
+    }
+    .modal,
+.reset {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.95);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-box {
+  background: #0f172a;
+  padding: 25px;
+  border-radius: 12px;
+  text-align: center;
+  color: #fff;
+  width: 85%;
+  max-width: 300px;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.modal-actions button {
+  flex: 1;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+
+#yesBtn {
+  background: #00cc99;
+  color: #fff;
+}
+
+#noBtn {
+  background: #334155;
+  color: #fff;
+}
+
+.reset {
+  flex-direction: column;
+  padding: 25px;
+  color: #fff;
+}
+
+.reset input {
+  width: 90%;
+  max-width: 350px;
+  margin-bottom: 15px;
+}
+
+.reset button {
+  background: #00cc99;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  color: #fff;
+  font-weight: bold;
+  width: 90%;
+  max-width: 350px;
+}
+
+#resetMsg {
+  margin-top: 15px;
+  font-size: 14px;
+}
+.close {
+  position: absolute;
+  top: 18px;
+  right: 20px;
+  font-size: 28px;
+  font-weight: bold;
+  color: #94a3b8;
+  cursor: pointer;
+}
+
+.close:hover {
+  color: #fff;
+}
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255,255,255,0.3);
+  border-top: 3px solid #fff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: auto;
+}
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+button.loading {
+  pointer-events: none;
+  opacity: 0.85;
+}
+</style>
+</head>
+
+<body>
+
+<div class="login-box">
+    <h1>SociHub Login</h1>
+
+    <div class="input-group">
+        <input type="email" id="email" placeholder="Email">
+    </div>
+
+    <div class="input-group">
+        <input type="password" id="password" placeholder="Password">
+    </div>
+
+<button id="loginBtn">
+  <span class="btn-text">Login</span>
+</button>
+<p style="text-align: center; color:#fff; position:relative; top:350px;">Don't have an account?<a href="1page.html">Sign up</a></p>
+    <p class="error" id="errorBox"></p>
+</div>
+<!-- Forget Password Question Modal -->
+<div id="forgetModal" class="modal hidden">
+  <div class="modal-box">
+    <span class="close" id="closeForget">&times;</span>
+    <p>Did you forget your password?</p>
+
+    <div class="modal-actions">
+      <button id="yesBtn">Yes</button>
+      <button id="noBtn">No</button>
+    </div>
+  </div>
+</div>
+
+<!-- Fullscreen Reset Password -->
+<div id="resetScreen" class="reset hidden">
+  <span class="close" id="closeReset">&times;</span>
+
+  <h2>Reset Password</h2>
+  <input type="email" id="resetEmail" placeholder="Enter your email">
+<button id="resetBtn">
+  <span class="btn-text">Reset Password</span>
+</button>
+  <p id="resetMsg"></p>
+</div>
+
+<script type="module">
+
+// ============================
+// ✅ Firebase Setup
+// ============================
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.firebasestorage.app",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",
+  measurementId: "G-KXW58D7RGM"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ============================
+// ✅ Login Logic + Role Redirection
+// ============================
+loginBtn.addEventListener("click", async () => {
+
+  if (!navigator.onLine) {
+    errorBox.textContent = "You are offline.";
+    
+  }
+
+  
+    const email = document.getElementById("email").value.trim();
+    const password = document.getElementById("password").value.trim();
+    const errorBox = document.getElementById("errorBox");
+
+    errorBox.textContent = "";
+
+    if (!email || !password) {
+        errorBox.textContent = "Please fill all fields.";
+        return;
+    }
+loginBtn.disabled = false;     // 🔒 disable
+  setLoading(loginBtn, true);   // 🔄 spinner ON
+    try {
+        // Login
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const user = userCredential.user;
+
+        // Fetch role from Firestore
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+
+        if (!userDoc.exists()) {
+            errorBox.textContent = "Account record not found.";
+            return;
+        }
+  setLoading(loginBtn, false);   
+        const role = userDoc.data().role;
+
+        // Redirect dashboard by role
+        if (role === "client") {
+            window.location.href = "client-page.html";
+        } 
+        else if (role === "earner") {
+            window.location.href = "earner-page.html";
+        } 
+        else if (role === "admin") {
+            window.location.href = "admin-page.html";
+        }
+         else if(role === 'owner') { window.location.href = 'platform-dashboard.html';
+        } 
+        else {
+            errorBox.textContent = "Invalid role assigned.";
+        }
+
+} catch (err) {
+
+    // 🔴 NETWORK / OFFLINE ERROR
+    if (err.code === "auth/network-request-failed") {
+        errorBox.textContent = "No internet connection. Please check your network.";
+        return; // stop here, don't count attempt
+    }
+        if (err.code === "auth/too-many-requests") {
+        errorBox.textContent = "To many attempts! reset password if forgotten";
+        return; // stop here, don't count attempt
+    }
+  setLoading(loginBtn, false);   // 🔄 spinner ON
+    // 🔴 INVALID LOGIN DETAILS
+    if (
+        err.code === "auth/wrong-password" ||
+        err.code === "auth/invalid-email" ||
+        err.code === "auth/user-not-found" ||
+        err.code === "auth/invalid-credential"
+    ) {
+        errorBox.textContent = "Invalid email or password.";
+
+        invalidAttempts++;
+
+        if (invalidAttempts % 3 === 0) {
+            forgetModal.classList.remove("hidden");
+        }
+        return;
+    }
+  setLoading(loginBtn, false); 
+  loginBtn.disabled = false;     
+    errorBox.textContent = err.message;
+}
+});
+let invalidAttempts = 0;
+
+const forgetModal = document.getElementById("forgetModal");
+const resetScreen = document.getElementById("resetScreen");
+
+document.getElementById("yesBtn").onclick = () => {
+  forgetModal.classList.add("hidden");
+  resetScreen.classList.remove("hidden");
+};
+
+document.getElementById("noBtn").onclick = () => {
+  forgetModal.classList.add("hidden");
+};
+resetBtn.onclick = async () => {
+
+  const email = resetEmail.value.trim();
+  resetMsg.textContent = "";
+
+  // 🔴 REQUIRED EMAIL
+  if (!email) {
+    resetMsg.textContent = "Please enter your email address.";
+    resetMsg.style.color = "red";
+    return;
+  }
+
+  // 🔴 OFFLINE CHECK
+  if (!navigator.onLine) {
+    resetMsg.textContent = "No internet connection.";
+    resetMsg.style.color = "red";
+    return;
+  }
+
+  resetBtn.disabled = true;
+  setLoading(resetBtn, true);
+
+  try {
+    await sendPasswordResetEmail(auth, email);
+    resetMsg.textContent =
+      "Password reset email sent! Check your inbox or spam folder.";
+    resetMsg.style.color = "#00cc99";
+
+  } catch (err) {
+
+    // ✅ FRIENDLY ERROR MESSAGES
+    if (err.code === "auth/invalid-email") {
+      resetMsg.textContent = "Please enter a valid email address.";
+    } 
+    else if (err.code === "auth/user-not-found") {
+      resetMsg.textContent = "No account found with this email.";
+    } 
+    else if (err.code === "auth/too-many-requests") {
+      resetMsg.textContent =
+        "Too many attempts. Please wait and try again later.";
+    } 
+    else if (err.code === "auth/network-request-failed") {
+      resetMsg.textContent = "No internet connection.";
+    } 
+    else {
+      resetMsg.textContent = err.message;
+    }
+
+    resetMsg.style.color = "red";
+
+  } finally {
+    resetBtn.disabled = false;
+    setLoading(resetBtn, false);
+  }
+};
+document.getElementById("closeForget").onclick = () => {
+  forgetModal.classList.add("hidden");
+};
+document.getElementById("closeReset").onclick = () => {
+  resetScreen.classList.add("hidden");
+  document.getElementById("resetEmail").value = "";
+  document.getElementById("resetMsg").textContent = "";
+};
+document.getElementById("closeReset").onclick = () => {
+  resetScreen.classList.add("hidden");
+};
+function setLoading(button, isLoading) {
+  const textSpan = button.querySelector(".btn-text");
+
+  if (isLoading) {
+    textSpan.style.display = "none";
+    button.innerHTML += `<div class="spinner"></div>`;
+    button.classList.add("loading");
+  } else {
+    const spinner = button.querySelector(".spinner");
+    if (spinner) spinner.remove();
+    textSpan.style.display = "inline";
+    button.classList.remove("loading");
+  }
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,939 @@
+<!DOCTYPE html> 
+<html lang="en">  
+<html lang="en">  
+<head>  
+<meta charset="UTF-8">  
+<title>Deposit</title>  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>  <style>  
+:root {  
+  --primary: #00ffcc;  
+  --dark: #111;  
+  --gray: #777;  
+  --bg: #f4f6f8;  
+}  
+  
+* { box-sizing: border-box; }  
+  
+body {  
+  margin: 0;  
+  background: var(--bg);  
+  font-family: "Inter", Arial, sans-serif;  
+  color: var(--dark);  
+}  
+  
+/* HEADER */  
+.header {  
+  display: flex;  
+  align-items: center;  
+  padding: 16px 20px;  
+  background: #fff;  
+  border-bottom: 1px solid #e5e5e5;  
+}  
+  
+.header i { font-size: 18px; cursor: pointer; }  
+.header h2 { font-size: 28px; margin: 0 auto; }  
+  
+/* CARD */  
+.wrapper { max-width: 420px; margin: 30px auto; padding: 0 13px; }  
+.card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,.06); }  
+.section { margin-top: 18px; }  
+.label { font-size: 13px; color: var(--gray); margin-bottom: 6px; }  
+  
+/* INPUTS */  
+input, select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; outline: none; }  
+input:focus, select:focus { border-color: var(--primary); }  
+input[readonly] { background: #f0f0f0; }  
+  
+/* COPY BOX */  
+.copy-box { display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px dashed #ddd; border-radius: 10px; font-size: 14px; cursor: pointer; transition: background .2s ease; }  
+.copy-box:hover { background: #f7f7f7; }  
+.copy-box i { color: var(--primary); }  
+  
+/* BUTTONS */  
+button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 600; font-size: 15px; margin-top: 20px; cursor: pointer; }  
+.primary-btn { background: var(--primary); color: #000; }  
+.primary-btn:disabled { background: #b6f0e4; cursor: not-allowed; }  
+  
+/* PAYMENT CARD */  
+.payment-card { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; display: none; }  
+.payment-card h3 { margin: 0 0 10px; font-size: 15px; }  
+.payment-info { background: #f9f9f9; border-radius: 10px; padding: 14px; font-size: 14px; }  
+.payment-info p { margin: 6px 0; }  
+  
+/* FEEDBACK */  
+.feedback { margin-top: 12px; font-size: 14px; }  
+.feedback.error { color: #e63946; }  
+.feedback.success { color: #2a9d8f; }  
+  
+/* MODAL */  
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 999; }  
+.modal-card { background: #fff; width: 90%; max-width: 360px; border-radius: 16px; padding: 25px; text-align: center; animation: pop .25s ease; }  
+@keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }  
+.modal-icon { width: 60px; height: 60px; background: #00ffcc; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px; font-weight: bold; }  
+.modal-card h2 { margin: 10px 0 6px; }  
+.modal-card p { font-size: 14px; color: #555; margin-bottom: 20px; }  
+#myDepositsContainer { margin-top:20px; }  
+.deposit-card { background:#fff; padding:15px; border-radius:12px; margin-bottom:12px; box-shadow:0 5px 15px rgba(0,0,0,.05); cursor:pointer; }  
+.deposit-card.rejected { border:1px solid #e63946; }  
+.deposit-card.pending, .deposit-card.verified { border:1px solid #00ffcc; }  
+.deposit-card p { margin:4px 0; font-size:14px; }  
+.slide-panel {  
+  position: fixed;  
+  top: 0;  
+  right: -100%;  
+  width: 100%;  
+  max-width: 420px;  
+  height: 100%;  
+  background: #f4f6f8;  
+  box-shadow: -4px 0 20px rgba(0,0,0,.1);
+  transition: right 0.3s ease;  
+  z-index: 9999;  
+  padding: 20px;  
+  overflow-y: auto;  
+}  
+  
+.slide-panel.open { right: 0; }  
+  
+.panel-header {  
+  color: #00cc88;
+  display: flex;  
+  justify-content: space-between;  
+  align-items: center;  
+  margin-bottom: 15px;  
+}  
+  #closeOverlayBtn {
+    position:absolute;
+    right:9%;
+    top:35%;
+  width:10%;
+  background:transparent;
+  color:white;
+  }
+.panel-header h2 { font-size:2rem;margin: 12px auto; }  
+.panel-header #closePanelBtn, #closePanel-Btn{  
+  color: #111;
+  font-size: 34px;  
+  background: none;  
+  cursor: pointer;  
+}  
+/* Overlay background */  
+.overlay {  
+  position: fixed;  
+  inset: 0;  
+  background: rgba(0,0,0,0.65);  
+  z-index: 9999;  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+}  
+  
+/* Hide helper */  
+.hidden {  
+  display: none;  
+}  
+  
+/* Card */  
+.overlay-card {  
+  background: #111;  
+  color: #fff;  
+  padding: 25px;  
+  border-radius: 12px;  
+  width: 85%;  
+  max-width: 320px;  
+  text-align: center;  
+  box-shadow: 0 0 20px rgba(0,255,204,0.3);  
+}  
+  
+/* Spinner */  
+.spinner {
+width: 45px;
+height: 45px;
+border-top: 4px solid #00ffcc;
+border-radius: 50%;
+margin: 0 auto 15px;
+border-bottom: 4px solid red;
+animation: spin 0.4s linear infinite;
+}  
+  
+@keyframes spin {  
+  to { transform: rotate(360deg); }  
+}  
+  
+/* Lock page scroll */  
+body.locked {  
+  overflow: hidden;  
+}
+.flextop {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  background: transparent;
+  position: relative;
+  left: 17px;
+  width: 90%;
+  padding: 8px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #0f172a;
+  box-shadow:0 1px 8px rgba(0,0,0,0.02);
+}
+/* SAFETY PANEL CONTENT */
+
+.safety-content {
+  line-height: 1.7;
+  font-size: 14px;
+  color: #111;
+}
+
+.safety-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.safety-text {
+  margin-bottom: 14px;
+  color: #333;
+}
+
+.safety-list {
+  padding-left: 18px;
+  margin: 18px 0;
+}
+
+.safety-list li {
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.safety-list li strong {
+  color: #000;
+}
+
+.safety-try {
+  margin-top: 18px;
+  font-weight: 500;
+  color: #111;
+}
+
+.try-amount {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.try-amount:hover {
+  opacity: 0.85;
+}
+
+.safety-note {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #555;
+}
+</style>  
+</head> 
+<body>  
+<div id="depositForm">  
+  <div class="header">  
+    <i class="fas fa-arrow-left" onclick="history.back()"></i>  
+    <h2>Deposit System</h2>  
+  </div>  
+<div class="flextop">  <strong id="viewMyDepositsBtn">History</strong> <strong id="safety">Safe?</strong> </div> 
+  <div class="wrapper">  
+    <div class="card">  <div class="section">  
+    <div class="label">User Identification</div>  
+    <div class="copy-box" id="copyMyId">  
+      <i class="fas fa-copy"></i>  
+      <span>Copy my ID</span>  
+    </div>  
+  </div>  
+
+  <div class="section">  
+    <div class="label">Client Name</div>  
+    <input type="text" id="clientName" readonly>  
+  </div>  
+  <div class="section">
+
+  <div class="label">Bank Full Name</div>  
+  <input type="text" id="bankName" placeholder="Be cautious of entry...">  
+</div>  
+      <div class="section">  
+        <div class="label">Deposit Amount</div>  
+<select id="amount">
+  <option value="">Select amount</option>
+  <option value="500" hidden>₦500</option>
+  <option value="1000">₦1,000</option>
+  <option value="2000">₦2,000</option>
+  <option value="5000">₦5,000</option>
+  <option value="10000">₦10,000</option>
+</select>  
+      </div>  <button class="primary-btn" id="genTx">Generate Transaction ID</button>  
+
+  <div class="payment-card" id="paymentCard">  
+    <h3>Payment Details</h3>  
+    <div class="payment-info">  
+      <p><strong>Transaction ID:</strong> <span id="txId"></span></p>  
+      <p><strong>Bank:</strong> Opay</p>  
+      <p><strong>Account Name:</strong> Prince Chibuzo SociHub</p>  
+      <p><strong>Account Number:</strong> 6422495922</p>  
+    </div>  
+
+    <div class="section">  
+      <div class="label">Upload Proof of Payment</div>  
+      <input type="file" id="proof" accept="image/*">  
+    </div>  
+
+    <div class="feedback" id="feedback"></div>  
+    <button class="primary-btn" id="submitBtn" disabled>Submit Deposit</button>  
+  </div>  
+</div>
+
+  </div>  
+</div>  <!-- Processing Card -->  <div id="processingCard" style="display:none; max-width:420px; margin:20px auto; padding:20px; background:#fff; border-radius:14px; box-shadow:0 10px 25px rgba(0,0,0,.06);">  
+  <p>Transaction: <span id="procTx"></span></p>  
+  <p>Amount: <span id="procAmount"></span></p>  
+  <p>Status: <span id="procStatus"></span></p>  
+  <p>User ID: <span id="procUserId"></span></p>  
+  <p>Date: <span id="procDate"></span></p>  
+  <img id="procProof" style="max-width:300px; margin-top:10px; border:1px solid #ccc; border-radius:8px;">  
+  <p id="processTitle"></p>  
+  <button id="openDepositBtn">Back</button>  
+</div>  <!-- Success Modal -->  <div class="modal-overlay" id="successModal">  
+  <div class="modal-card">  
+    <div class="modal-icon">✓</div>  
+    <h2>Deposit Submitted</h2>  
+    <p>Your payment is being processed.<br>You can track the status below.</p>  
+    <button id="viewDepositBtn" class="primary-btn">View Deposit</button>  
+  </div>  
+</div>  
+<div id="myDepositsContainer"></div>  
+<div id="depositPanel" class="slide-panel">  
+  <div class="panel-header">  
+    <h2>My Deposits</h2>  
+    <div id="closePanelBtn">&times;</div>
+  </div>  
+  <div id="depositPanelContent"></div>  </div>
+  <div id="myDepositsContainer"></div>  
+<div id="safetyPanel" class="slide-panel">  
+  <div class="panel-header">  
+    <h2>How is this Safe?</h2>  
+    <div id="closePanel-Btn">&times;</div>
+  </div>  
+  <div id="SafetyPanelContent"></div>  </div>
+<!-- SUBMIT OVERLAY -->  
+<div id="submitOverlay" class="overlay hidden">  
+  <div class="overlay-card">  
+    <button id="closeOverlayBtn" class="close-btn" disabled>&times;</button>  <div class="spinner" id="overlaySpinner"></div>  
+
+<p id="overlayText">  
+  Submitting transfer proof<br>  
+  <small>This might take a while</small>  
+</p>
+
+  </div>  
+</div>  
+<script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
+import { getFirestore, collection, addDoc, serverTimestamp, onSnapshot, doc, getDoc, updateDoc, getDocs } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";  
+  
+const firebaseConfig = {  
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",  
+  authDomain: "socihub-a2731.firebaseapp.com",  
+  projectId: "socihub-a2731",  
+  storageBucket: "socihub-a2731.appspot.com",  
+  messagingSenderId: "815252223754",  
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",  
+  measurementId: "G-KXW58D7RGM"  
+};  
+  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const db = getFirestore(app);  
+  
+// DOM Elements  
+const depositForm = document.getElementById("depositForm");  
+const processingCard = document.getElementById("processingCard");  
+const txId = document.getElementById("txId");  
+const amount = document.getElementById("amount");  
+const clientName = document.getElementById("clientName");  
+const proof = document.getElementById("proof");  
+const submitBtn = document.getElementById("submitBtn");  
+const paymentCard = document.getElementById("paymentCard");  
+const feedback = document.getElementById("feedback");  
+const genTxBtn = document.getElementById("genTx");  
+const successModal = document.getElementById("successModal");  
+const viewDepositBtn = document.getElementById("viewDepositBtn");  
+const copyMyIdBtn = document.getElementById("copyMyId");  
+  
+const procTx = document.getElementById("procTx");  
+const procAmount = document.getElementById("procAmount");  
+const procStatus = document.getElementById("procStatus");  
+const procUserId = document.getElementById("procUserId");  
+const procDate = document.getElementById("procDate");  
+const procProof = document.getElementById("procProof");  
+const processTitle = document.getElementById("processTitle");  
+const openDepositBtn = document.getElementById("openDepositBtn");  
+  const safety = document.getElementById("safety");
+  const safetypanel = document.getElementById("safetypanel");
+  const SafetyPanelContent = document.getElementById("SafetyPanelContent");
+const viewMyDepositsBtn = document.getElementById("viewMyDepositsBtn");  
+const depositPanel = document.getElementById("depositPanel");  
+const depositPanelContent = document.getElementById("depositPanelContent");  
+const closePanelBtn = document.getElementById("closePanelBtn");  
+const closePanelBtnn = document.getElementById("closePanel-Btn");
+const overlay = document.getElementById("submitOverlay");  
+const overlayText = document.getElementById("overlayText");  
+  
+  
+const PAGE = {
+  DEPOSIT_PANEL: "depositPanel",
+  SAFETY_PANEL: "safetyPanel",
+  PROCESSING: "processingCard",
+  RESUBMIT: "resubmitForm"
+};
+
+let pageStack = [];
+window.addEventListener("popstate", () => {
+  if (!pageStack.length) return;
+
+  const lastPage = pageStack.pop();
+
+  switch (lastPage) {
+    case PAGE.RESUBMIT:
+      viewMyDepositsBtn.click();
+      break;
+
+    case PAGE.DEPOSIT_PANEL:
+      closeDepositPanel();
+      break;
+
+    case PAGE.SAFETY_PANEL:
+      closeSafetyPanel();
+      break;
+
+    case PAGE.PROCESSING:
+      closeProcessingCard();
+      break;
+  }
+});
+function closeDepositPanel() {
+  depositPanel.classList.remove("open");
+}
+
+function closeSafetyPanel() {
+  safetyPanel.classList.remove("open");
+}
+
+function closeProcessingCard() {
+  processingCard.style.display = "none";
+  depositForm.style.display = "block";
+}
+  
+  
+const closeOverlayBtn = document.getElementById("closeOverlayBtn");  
+const overlaySpinner = document.getElementById("overlaySpinner");  
+  
+let overlayTimeout = null;  
+  
+function showSubmitOverlay(){  
+  overlay.classList.remove("hidden");  
+  document.body.classList.add("locked");  
+  
+  closeOverlayBtn.disabled = true;  
+  overlaySpinner.style.display = "block";  
+  
+  overlayText.innerHTML = `  
+    <strong style="color: #00ffcc;">Submitting transfer proof<br></strong>  
+    <small>This might take a while</small>  
+  `;  
+  
+  overlayTimeout = setTimeout(()=>{  
+    overlaySpinner.style.display = "none";  
+    overlayText.innerHTML = `  
+      <strong>Taking longer than expected</strong><br>  
+      <small>Please reload the page and try again</small>  
+    `;  
+    closeOverlayBtn.disabled = false;  
+  }, 60000);  
+}  
+  
+function hideSubmitOverlay(){  
+  clearTimeout(overlayTimeout);  
+  overlay.classList.add("hidden");  
+  document.body.classList.remove("locked");  
+}  
+  
+closeOverlayBtn.addEventListener("click", ()=>{  
+  if(closeOverlayBtn.disabled) return;  
+  hideSubmitOverlay();  
+});  
+  
+const MAX_FILE_SIZE_MB = 5;  
+  
+// STATE  
+let currentUserId = "";  
+let transactionId = "";  
+  
+// Auth check  
+onAuthStateChanged(auth, async user => {  
+  if (!user) { location.href = "login.html"; return; }  
+  try {  
+    const snap = await getDoc(doc(db,"users",user.uid));  
+    
+    if(!snap.exists() || snap.data().role!=="client") { location.href="no_access.html"; return; }  
+    currentUserId = user.uid;  
+    disable500OptionIfUsed();
+    clientName.value = snap.data().name;  
+  } catch(e){ console.error(e); }  
+});  
+  
+// Copy ID  
+copyMyIdBtn.addEventListener("click", ()=>{  
+  if(!currentUserId) return;  
+  navigator.clipboard.writeText(currentUserId);  
+  copyMyIdBtn.querySelector("span").textContent = "ID copied ✓";  
+  setTimeout(()=>{ copyMyIdBtn.querySelector("span").textContent="Copy my ID"; },1500);  
+});  
+  
+// Generate transaction  
+genTxBtn.addEventListener("click", ()=>{  
+  if(transactionId) return;  
+  
+  // Client name must be loaded  
+  if(!clientName.value || clientName.value.trim().length === 0){  
+    alert("Client name not loaded yet!");  
+    return;  
+  }  
+const bankFullName = document.getElementById("bankName").value.trim();  
+  // Bank name validation  
+  
+  const spaceCount = (bankFullName.match(/\s/g) || []).length;  
+  
+  if(bankFullName.length < 6 || spaceCount < 2){  
+    alert("Bank full name must be at least 6 characters and contain at least 2 spaces!");  
+    return;  
+  }  
+  
+  if(!amount.value){ alert("Select amount"); return; }  
+  
+  transactionId = "TX-" + Date.now();  
+  txId.textContent = transactionId;  
+  paymentCard.style.display = "block";  
+  genTxBtn.disabled = true;  
+  genTxBtn.textContent = "Transaction ID Generated";  
+});  
+  
+amount.addEventListener("change", ()=>{  
+  transactionId = "";  
+  genTxBtn.disabled = false;  
+  genTxBtn.textContent = "Generate Transaction ID";  
+  paymentCard.style.display = "none";  
+});  
+  
+// Proof file input  
+proof.onchange = () => {  
+  if(!proof.files.length) { submitBtn.disabled=true; feedback.textContent=""; return; }  
+  const file = proof.files[0];  
+  const fileSizeMB = file.size/(1024*1024);  
+  feedback.textContent = `Selected file: ${fileSizeMB.toFixed(2)} MB`;  
+  if(fileSizeMB > MAX_FILE_SIZE_MB){  
+    feedback.textContent += " - File too large! Max 2 MB";  
+    submitBtn.disabled = true;  
+  } else {  
+    submitBtn.disabled = false;  
+  }  
+};  
+  
+// Submit deposit  
+submitBtn.addEventListener("click", async () => {
+  if(!transactionId || !proof.files.length) return;
+
+  const file = proof.files[0];
+  const bankFullName = document.getElementById("bankName").value.trim();
+
+  submitBtn.disabled = true;
+  showSubmitOverlay();
+
+  try {
+    // 1️⃣ Upload file to Cloudinary
+    const fileUrl = await uploadToCloudinary(file);
+
+    // 2️⃣ Save deposit reference to Firestore
+    if (Number(amount.value) === 500) {
+  localStorage.setItem(`used500_${currentUserId}`, "true");
+}
+    const docRef = await addDoc(collection(db, "deposits"), {
+      userId: currentUserId,
+      transactionId,
+      amount: Number(amount.value),
+      clientName: clientName.value,
+      bankName: bankFullName,
+      fileUrl,         // ✅ Store Cloudinary URL instead of Base64
+      status: "pending",
+      createdAt: serverTimestamp()
+    });
+
+    // 3️⃣ Update UI
+    showProcessingUI({
+      transactionId,
+      amount: amount.value,
+      proofUrl: fileUrl,
+      status: "pending",
+      createdAt: new Date(),
+      userId: currentUserId,
+      docId: docRef.id,
+      bankName
+    });
+
+    successModal.style.display = "flex";
+    paymentCard.style.display = "none";
+    amount.value = "";
+    txId.textContent = "";
+    proof.value = "";
+    submitBtn.disabled = true;
+    genTxBtn.disabled = false;
+    genTxBtn.textContent = "Generate Transaction ID";
+    feedback.textContent = "";
+    transactionId = "";
+
+  } catch(e) {
+    feedback.textContent = e.message;
+    feedback.className = "feedback error";
+    submitBtn.disabled = false;
+  } finally {
+    hideSubmitOverlay();
+  }
+});  
+  
+async function uploadToCloudinary(file, timeoutMs = 60000) {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", "deposit_preset");
+
+    const res = await fetch(
+      "https://api.cloudinary.com/v1_1/dp0qteuda/upload",
+      {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      }
+    );
+
+    if (!res.ok) throw new Error("Upload failed");
+
+    const data = await res.json();
+    if (!data.secure_url) throw new Error("Upload incomplete");
+
+    return data.secure_url;
+
+  } catch (e) {
+    if (e.name === "AbortError") {
+      throw new Error("Upload timed out. Please try again.");
+    }
+    throw new Error("Network error. Please try again.");
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+  
+// Show processing UI  
+function showProcessingUI(data){
+  depositForm.style.display = "none";
+  processingCard.style.display = "block";
+  pageStack.push(PAGE.PROCESSING);
+  history.pushState({}, "");
+
+
+  procTx.textContent = data.transactionId;
+  procAmount.textContent = data.amount;
+  procStatus.textContent = data.status;
+  procUserId.textContent = data.userId;
+  procDate.textContent = data.createdAt.toLocaleString();
+  procProof.src = data.proofUrl;  // Use Cloudinary URL
+  const bankEl = document.getElementById("procBank");
+  if(bankEl) bankEl.textContent = data.bankName;
+
+  listenForVerification(data.docId);
+}
+  
+// Firestore live status  
+function listenForVerification(docId){  
+  const refDoc = doc(db,"deposits",docId);  
+  onSnapshot(refDoc,(snap)=>{  
+    if(!snap.exists()) return;  
+    const data = snap.data();  
+    procStatus.textContent = data.status;  
+    if(data.status==="verified"){  
+      processTitle.textContent="Payment Verified ✅";  
+      openDepositBtn.style.display="block";  
+    }  
+  });  
+}  
+  
+// Modal buttons  
+viewDepositBtn.addEventListener("click", ()=>{  
+  successModal.style.display="none";  
+  depositForm.style.display="none";  
+  processingCard.style.display="block";  
+});  
+  
+openDepositBtn.addEventListener("click", ()=>{  
+  processingCard.style.display="none";  
+  depositForm.style.display="block";  
+  transactionId="";  
+  genTxBtn.disabled=false;  
+  genTxBtn.textContent="Generate Transaction ID";  
+});  
+  
+// View my deposits panel  
+viewMyDepositsBtn.addEventListener("click", async () => {
+  depositPanelContent.innerHTML = "Loading...";  
+  const q = collection(db, "deposits");  
+  const snap = await getDocs(q);  
+  
+  const userDeposits = [];  
+  snap.forEach(doc => {  
+    const data = doc.data();  
+    if(data.userId === currentUserId){  
+      userDeposits.push({ id: doc.id, ...data });  
+    }  
+  });  
+  
+  if(userDeposits.length===0){  
+    depositPanelContent.innerHTML="<p>No deposits found.</p>";  
+  } else {  
+    let html="";  
+    const pendingVerified = userDeposits.filter(d => d.status==="pending" || d.status==="verified");  
+    const rejected = userDeposits.filter(d => d.status==="rejected");  
+  
+    if(pendingVerified.length){  
+      html += "<h3>Pending / Verified</h3>";  
+      pendingVerified.forEach(d=>{  
+        html += `<div class="deposit-card ${d.status}" data-id="${d.id}">  
+          <p><strong>TX:</strong> ${d.transactionId}</p>  
+          <p><strong>Amount:</strong> ₦${d.amount}</p>  
+          <p><strong>Status:</strong> ${d.status}</p>  
+          <p><strong>Date:</strong> ${d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : ''}</p>  
+        </div>`;  
+      });  
+    }  
+  
+    if(rejected.length){  
+      html += "<h3>Rejected</h3>";  
+      rejected.forEach(d=>{  
+        html += `<div class="deposit-card rejected" data-id="${d.id}">  
+          <p><strong>TX:</strong> ${d.transactionId}</p>  
+          <p><strong>Amount:</strong> ₦${d.amount}</p>  
+          <p><strong>Status:</strong> ${d.status}</p>  
+          <p><strong>Reason:</strong> ${d.rejectReason || 'No reason provided'}</p>  
+          <p><strong>Date:</strong> ${d.createdAt?.toDate ? d.createdAt.toDate().toLocaleString() : ''}</p>  
+        </div>`;  
+      });  
+    }  
+  
+    depositPanelContent.innerHTML = html;  
+  
+    document.querySelectorAll(".deposit-card.rejected").forEach(card=>{  
+      card.addEventListener("click", ()=>openResubmitForm(card.dataset.id));  
+    });  
+  }  
+  
+    depositPanel.classList.add("open");
+  pageStack.push(PAGE.DEPOSIT_PANEL);
+  history.pushState({}, "");
+});
+  
+  safety.addEventListener("click", async () => {  
+SafetyPanelContent.innerHTML = `
+  <div class="safety-content">
+
+    <h3 class="safety-title">Is Manual Deposit Safe?</h3>
+
+    <p class="safety-text">
+      You might be wondering if it is safe to make a deposit using the
+      <strong>Manual Deposit</strong> system. This concern is completely valid,
+      especially when dealing with online payments. SociHub designed this
+      deposit method to prioritize transparency, traceability, and user
+      protection at every stage of the process.
+    </p>
+
+    <p class="safety-text">
+      Unlike automatic payment gateways where errors can occur without clear
+      explanations, the Manual Deposit system allows every transaction to be
+      reviewed carefully. Each payment you make is linked to a unique
+      Transaction ID generated specifically for your account. This ID ensures
+      that your deposit can always be tracked, verified, and resolved if any
+      issue arises.
+    </p>
+
+    <ul class="safety-list">
+      <li>
+        <strong>Unique Transaction Tracking:</strong>
+        Every deposit is assigned a one-of-a-kind Transaction ID, preventing
+        duplicate or lost payments.
+      </li>
+
+      <li>
+        <strong>Human Verification:</strong>
+        All deposits are manually reviewed to confirm accuracy before your
+        balance is credited.
+      </li>
+
+      <li>
+        <strong>Secure Proof Handling:</strong>
+        Uploaded payment proofs are securely stored and protected from
+        unauthorized modification.
+      </li>
+
+      <li>
+        <strong>Status Transparency:</strong>
+        You can always view whether your deposit is pending, verified, or
+        rejected directly from your deposit history.
+      </li>
+    </ul>
+
+    <p class="safety-text">
+      For first-time users, we strongly advise starting with a small test
+      deposit. This allows you to understand how the system works without
+      committing a large amount. Once you see how smoothly the process runs,
+      you can confidently proceed with higher deposits.
+    </p>
+
+    <p class="safety-try">
+      Recommended first-time test deposit:
+      <span id="try500" data-value="500" class="try-amount">
+        ₦500
+      </span>
+    </p>
+
+    <p class="safety-note">
+      Please note: the ₦500 test deposit is available only once per user and is
+      designed strictly for onboarding and trust-building purposes.
+    </p>
+
+  </div>
+`;
+safetyPanel.classList.add("open");
+  pageStack.push(PAGE.SAFETY_PANEL);
+  history.pushState({}, "");
+});
+  function lockAmount(value) {
+  amount.value = value;
+
+  // Lock select
+  amount.disabled = true;
+  amount.style.background = "#f0f0f0";
+
+  // Reset transaction state
+  transactionId = "";
+  genTxBtn.disabled = false;
+  genTxBtn.textContent = "Generate Transaction ID";
+}
+  document.addEventListener("click", (e) => {
+  if (e.target.id === "try500") {
+
+    // Check if user already used ₦500 before
+    const used500 = localStorage.getItem(`used500_${currentUserId}`);
+    if (used500 === "true") {
+      alert("₦500 trial deposit can only be used once.");
+      return;
+    }
+
+    lockAmount("500");
+    safetyPanel.classList.remove("open");
+  }
+});
+function disable500OptionIfUsed() {
+  const used500 = localStorage.getItem(`used500_${currentUserId}`);
+  const option500 = [...amount.options].find(o => o.value === "500");
+
+  if (used500 === "true" && option500) {
+    option500.disabled = true;
+    option500.textContent = "₦500 (Used)";
+  }
+}
+  
+closePanelBtn.addEventListener("click", ()=> depositPanel.classList.remove("open"));  
+closePanelBtnn.addEventListener("click", ()=> safetyPanel.classList.remove("open"));  
+  
+// Resubmit rejected deposit  
+function openResubmitForm(docId){  
+  getDoc(doc(db,"deposits",docId)).then(snap=>{  
+    if(!snap.exists()) return;  
+    const data = snap.data();  
+  
+    depositPanelContent.innerHTML = `  
+      <div class="card">  
+        <div class="section">  
+          <input type="checkbox" id="prevPaymentCheck"> <label for="prevPaymentCheck">I have made payments before</label>  
+        </div>  
+        <div class="section">  
+          <label>Amount</label>  
+          <input type="text" id="resubmitAmount" value="${data.amount}" readonly>  
+        </div>  
+        <div class="section">  
+          <label>Client Name</label>  
+          <input type="text" id="resubmitName" value="${clientName.value}" readonly>  
+        </div>  
+        <div class="section">  
+          <label>Bank Name</label>  
+          <input type="text" id="resubmitBank" value="Opay" readonly>  
+        </div>  
+        <div class="section">  
+          <label>Upload New Proof</label>  
+          <input type="file" id="resubmitProof" accept="image/*">  
+        </div>  
+        <button id="resubmitBtn" class="primary-btn" disabled>Resubmit Deposit</button>  
+      </div>  
+    `;  
+  
+    const resubmitBtn = document.getElementById("resubmitBtn");  
+    const resubmitProof = document.getElementById("resubmitProof");  
+  
+    resubmitProof.onchange = () => {  
+      const file = resubmitProof.files[0];  
+      if(!file) { resubmitBtn.disabled=true; return; }  
+      const fileSizeMB = file.size/(1024*1024);  
+      if(fileSizeMB>MAX_FILE_SIZE_MB){ successModal("File too large! Max 5 MB"); resubmitBtn.disabled=true; }  
+      else resubmitBtn.disabled=false;  
+    };  
+  
+    resubmitBtn.addEventListener("click", async ()=>{  
+      if(!resubmitProof.files.length) return;  
+      const file = resubmitProof.files[0];  
+      const reader = new FileReader();  
+      reader.onload = async ()=>{  
+        try{  
+       const fileUrl = await uploadToCloudinary(file);
+          await updateDoc(doc(db,"deposits",docId),{  
+            fileUrl,  
+            status: "paid-prev",  
+            resubmitAt: serverTimestamp()  
+          });  
+          alert("Deposit resubmitted successfully!");  
+          viewMyDepositsBtn.click();  
+        }catch(e){ alert(e.message); }  
+      };  
+      reader.readAsDataURL(file);  
+    });  
+  });  
+}  
+</script>  
+
+</body>  
+</html> 

@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pending Deposits Admin</title>
+<style>
+  body { font-family: sans-serif; padding: 20px; }
+  .deposit-card { border: 1px solid #00ffcc; padding: 10px; margin-bottom: 10px; border-radius: 8px; }
+  button { padding: 6px 10px; margin: 5px 5px 0 0; cursor: pointer; }
+  img { max-width: 200px; display: block; margin-top: 10px; border: 1px solid #ccc; }
+  #log { background: #f0f0f0; padding: 10px; max-height: 150px; overflow-y: auto; margin-top: 10px; }
+  .modal-bg { display:none; position:fixed; top:0;left:0;width:100%;height:100%; background:rgba(0,0,0,0.5); justify-content:center; align-items:center; }
+  .modal { background:#fff; padding:20px; border-radius:8px; min-width:300px; }
+  .reason-btn { margin:5px; padding:5px 10px; border:1px solid #ccc; cursor:pointer; border-radius:4px; }
+  .reason-btn.selected { background:#00ffcc; }
+</style>
+</head>
+<body>
+
+<h1>Pending Deposits</h1>
+<div id="depositsContainer"></div>
+<pre id="log"></pre>
+
+<!-- Approve Modal -->
+<div id="approveModal" class="modal-bg">
+  <div class="modal">
+    <p>Are you sure you want to approve this deposit?</p>
+    <button id="confirmApproveBtn">Yes</button>
+    <button id="cancelApproveBtn">No</button>
+  </div>
+</div>
+
+<!-- Reject Modal -->
+<div id="rejectModal" class="modal-bg">
+  <div class="modal">
+    <p>Select a reason for rejection:</p>
+    <div>
+      <button class="reason-btn" data-reason="Unclear image">Unclear image</button>
+      <button class="reason-btn" data-reason="Payment not found">Payment not found</button>
+      <button class="reason-btn" data-reason="Other">Other</button>
+    </div>
+    <button id="submitRejectBtn" disabled>Submit</button>
+    <button id="cancelRejectBtn">Cancel</button>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, collection, getDocs, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.appspot.com",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",
+  measurementId: "G-KXW58D7RGM"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+const auth = getAuth(app);
+
+const depositsContainer = document.getElementById("depositsContainer");
+const logEl = document.getElementById("log");
+function logMsg(msg){ console.log(msg); logEl.textContent += msg + "\n"; }
+
+// Modals
+const approveModal = document.getElementById("approveModal");
+const rejectModal = document.getElementById("rejectModal");
+const confirmApproveBtn = document.getElementById("confirmApproveBtn");
+const cancelApproveBtn = document.getElementById("cancelApproveBtn");
+const submitRejectBtn = document.getElementById("submitRejectBtn");
+const cancelRejectBtn = document.getElementById("cancelRejectBtn");
+let selectedRejectReason = "";
+let currentDocId = "";
+let currentUserId = "";
+let currentAmount = 0;
+
+// Reject reason buttons
+const reasonBtns = Array.from(document.querySelectorAll(".reason-btn"));
+reasonBtns.forEach(btn => {
+  btn.addEventListener("click", ()=>{
+    reasonBtns.forEach(b=>b.classList.remove("selected"));
+    btn.classList.add("selected");
+    selectedRejectReason = btn.dataset.reason;
+    submitRejectBtn.disabled = false;
+  });
+});
+
+// Close modals
+cancelApproveBtn.onclick = () => approveModal.style.display = "none";
+cancelRejectBtn.onclick = () => rejectModal.style.display = "none";
+
+// Approve modal confirm
+confirmApproveBtn.onclick = async () => {
+  confirmApproveBtn.disabled = true; // block double click
+  try{
+    // Update deposit status
+    await updateDoc(doc(db,"deposits",currentDocId), { status:"approved" });
+    // Increment user's balance
+    await updateDoc(doc(db,"users",currentUserId), { balance: increment(currentAmount) });
+    approveModal.style.display="none";
+    logMsg(`Deposit ${currentDocId} approved. User balance updated.`);
+    loadPendingDeposits();
+  }catch(e){
+    logMsg("Error approving: "+e.message);
+    confirmApproveBtn.disabled = false; // re-enable if error occurs
+  }
+};
+
+// Reject modal submit
+submitRejectBtn.onclick = async () => {
+  try{
+    await updateDoc(doc(db,"deposits",currentDocId), {
+      status:"rejected",
+      rejectReason: selectedRejectReason
+    });
+    rejectModal.style.display="none";
+    logMsg(`Deposit ${currentDocId} rejected. Reason: ${selectedRejectReason}`);
+    selectedRejectReason="";
+    reasonBtns.forEach(b=>b.classList.remove("selected"));
+    submitRejectBtn.disabled = true;
+    loadPendingDeposits();
+  }catch(e){ logMsg("Error rejecting: "+e.message); }
+};
+
+// Load pending deposits
+async function loadPendingDeposits(){
+  depositsContainer.innerHTML = "";
+  const snap = await getDocs(collection(db,"deposits"));
+  snap.forEach(docSnap => {
+    const data = docSnap.data();
+    if(data.status!=="pending") return; // only pending
+    const card = document.createElement("div");
+    card.className="deposit-card";
+    card.innerHTML = `
+      <p><strong>TX:</strong> ${data.transactionId}</p>
+      <p><strong>Amount:</strong> ₦${data.amount}</p>
+      <p><strong>Status:</strong> ${data.status}</p>
+      <p><strong>Client Name:</strong> ${data.clientName}</p>
+      <p><strong>Bank Name:</strong> ${data.bankName}</p>
+      <p><strong>User ID:</strong> ${data.userId}</p>
+      <button class="viewBtn">View File</button>
+      <button class="approveBtn">Approve</button>
+      <button class="rejectBtn">Reject</button>
+      <div class="filePreview" style="display:none;"><img src="${data.fileUrl}" alt="Deposit File"></div>
+    `;
+    const viewBtn = card.querySelector(".viewBtn");
+    const previewDiv = card.querySelector(".filePreview");
+    viewBtn.onclick = ()=> previewDiv.style.display = previewDiv.style.display==="none"?"block":"none";
+
+    // Approve button
+    card.querySelector(".approveBtn").onclick = ()=>{
+      currentDocId = docSnap.id;
+      currentUserId = data.userId;
+      currentAmount = data.amount;
+      approveModal.style.display="flex";
+    };
+    // Reject button
+    card.querySelector(".rejectBtn").onclick = ()=>{
+      currentDocId = docSnap.id;
+      rejectModal.style.display="flex";
+    };
+
+    depositsContainer.appendChild(card);
+  });
+}
+
+// Auth check
+onAuthStateChanged(auth,user=>{
+  if(!user){ logMsg("No user logged in"); return; }
+  loadPendingDeposits();
+});
+</script>
+
+</body>
+</html>
+</html>
+</html>
