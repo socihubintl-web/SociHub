@@ -2067,7 +2067,7 @@ const textColors = {
 
   if (snap.empty) {
     list.innerHTML =
-      "<div style='text-align:center; color:#888;'>No v-report projects found</div>";
+      "<div style='text-align:center; color:#888;'>No project reported</div>";
     return;
   }
 
@@ -2159,7 +2159,7 @@ const textColors = {
 
   if (snap.empty) {
     list.innerHTML =
-      "<div style='text-align:center; color:#888; margin:20px;'>No completed projects yet</div>";
+      "<div style='text-align:center; color:#888; margin:20px;'>No project completed yet </div>";
     return;
   }
 
@@ -2256,7 +2256,7 @@ const textColors = {
   const snap = await getDocs(q);
 
   if (snap.empty) {
-    container.innerHTML = "<div style='text-align:center; color:#888;'>No n-progress projects</div>";
+    container.innerHTML = "<div style='text-align:center; color:#888;'>No project in-progress</div>";
     return;
   }
 
