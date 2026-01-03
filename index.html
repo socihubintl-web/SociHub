@@ -3,133 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SociHub</title>
+  <title>SochiHub</title>
+<!-- Open Graph / Social Preview -->
+<meta property="og:title" content="SociHub - Grow your social accounts">
+<meta property="og:description" content="Connect, track, and grow your social media presence easily!">
+<meta property="og:image" content="https://socihubintl-web.github.io/SociHub/assets/preview.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="1024">
+<meta property="og:url" content="https://socihubintl-web.github.io/SociHub/">
+<meta property="og:type" content="website">
 
-  <!-- Open Graph / Social Preview -->
-  <meta property="og:title" content="SociHub - Grow your social accounts">
-  <meta property="og:description" content="Connect, track, and grow your social media presence easily!">
-  <meta property="og:image" content="https://socihubintl-web.github.io/SociHub/assets/preview.png">
-  <meta property="og:image:width" content="1024">
-  <meta property="og:image:height" content="1024">
-  <meta property="og:url" content="https://socihubintl-web.github.io/SociHub/">
-  <meta property="og:type" content="website">
-
-  <!-- Twitter / X Card -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="SociHub - Grow your social accounts">
-  <meta name="twitter:description" content="Connect, track, and grow your social media presence easily!">
-  <meta name="twitter:image" content="https://socihubintl-web.github.io/SociHub/assets/preview.png">
-  <meta name="twitter:url" content="https://socihubintl-web.github.io/SociHub/">
+<!-- Twitter / X Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="SociHub - Grow your social accounts">
+<meta name="twitter:description" content="Connect, track, and grow your social media presence easily!">
+<meta name="twitter:image" content="https://socihubintl-web.github.io/SociHub/assets/preview.png">
+<meta name="twitter:url" content="https://socihubintl-web.github.io/SociHub/">
 
   <style>
-    /* Reset & body setup */
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
     body {
-      height: 100vh; /* full viewport height */
-      display: flex;
-      flex-direction: column; /* stack h1 + p vertically */
-      justify-content: center;
-      align-items: center;
+      margin: 0;
+      height: 90vh;
       background: #0f172a; /* dark theme */
       color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
       font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 0 1rem;
+      position: relative;
     }
 
     h1 {
-      font-size: 3rem;
-      margin-bottom: 0.5rem;
-    }
-
-    p {
-      font-size: 1.2rem;
-      opacity: 0.8;
-    }
-
-    /* Optional: add a subtle fade-in animation */
-    h1, p {
-      animation: fadeIn 1s ease forwards;
-      opacity: 0;
-    }
-
-    @keyframes fadeIn {
-      to { opacity: 1; }
-    }
-  </style>
-</head>
-
-<body>
-  <h1>SociHub</h1>
-  <p>Grow your social accounts...</p>
-
-  <!-- Firebase SDKs -->
-  <script type="module">
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-    import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-    import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-    const firebaseConfig = {
-      apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
-      authDomain: "socihub-a2731.firebaseapp.com",
-      projectId: "socihub-a2731",
-      storageBucket: "socihub-a2731.firebasestorage.app",
-      messagingSenderId: "815252223754",
-      appId: "1:815252223754:web:99a26383a59c2557412cf3",
-      measurementId: "G-KXW58D7RGM"
-    };
-
-    const app = initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const db = getFirestore(app);
-
-    let hasRedirected = false;
-
-    function waitForOnline() {
-      return new Promise(resolve => {
-        if (navigator.onLine) resolve();
-        else window.addEventListener("online", () => resolve(), { once: true });
-      });
-    }
-
-    onAuthStateChanged(auth, async user => {
-      if (hasRedirected) return;
-
-      await waitForOnline();
-
-      let targetPage = "1page.html";
-
-      if (user) {
-        try {
-          const snap = await getDoc(doc(db, "users", user.uid));
-          if (snap.exists()) {
-            const role = snap.data().role;
-            if (role === "client") targetPage = "client-page.html";
-            else if (role === "earner") targetPage = "earner-page.html";
-            else if (role === "admin") targetPage = "admin-page.html";
-            else if (role === "owner") targetPage = "platform-dashboard.html";
-          }
-        } catch (err) {
-          console.error("Firestore error:", err);
-          return; // stay on splash screen if Firestore fails
-        }
-      }
-
-      hasRedirected = true;
-
-      // Delay 4 seconds for splash screen
-      setTimeout(() => {
-        window.location.replace(targetPage);
-      }, 4000);
-    });
-  </script>
-</body>
-</html>      font-size: 2.5rem;
+      font-size: 2.5rem;
       margin: 0;
     }
 
