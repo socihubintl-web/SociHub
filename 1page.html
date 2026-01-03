@@ -201,19 +201,19 @@ body.dark .header-menu a {
     padding: 30px 20px;
     text-align: center;
   }
-  body.dark footer{
-    background-color: #f1f1f1;
-    color: #000;
+  body.dark footer {
+    background-color: #00cc88;
+    color: #fff;
     padding: 30px 20px;
     text-align: center;
-    }
+  }
   button {
     background-color: #00cc88;
     padding: 10px 0;
     border:none;
     width:40%;
     color:#fff;
-    border-radius:9px;
+    border-radius:8px;
   }
 </style>
 </head>
@@ -239,9 +239,9 @@ body.dark .header-menu a {
 
   <!-- dropdown menu -->
   <div class="header-menu" id="headerMenu">
-    <a href="#">Profile</a>
-    <a href="#">FAQ</a>
+    <a href="rules.html">FAQ</a>
     <a class="theme-toggle">Theme</a>
+    <a href="signup.html" class="logout">Sign Up</a>
     <a href="login.html" class="logout">Login</a>
   </div>
 </div>
@@ -267,7 +267,7 @@ body.dark .header-menu a {
       <li>Manage project budgets and fees transparently.</li>
     </ul>
     <p>The client interface is simple but powerful, allowing users to generate unique codes for projects and tasks, monitor engagement levels, and adjust assignments when needed. Clients no longer have to manually follow up with workers—everything is automated and visible in one place.</p>
-<button class="role-btn" onclick="goToSignup('client')">Client</button>
+<button class="role-btn" onclick="goToSignup('client')">Sign up as Client</button>
   </section>
 
   <section id="earners">
@@ -282,7 +282,7 @@ body.dark .header-menu a {
       <li>Offline-friendly functionality so tasks can be logged even without an internet connection, syncing automatically when online.</li>
     </ul>
     <p>Earners can track all tasks assigned to them, view completed and pending tasks, and monitor their total earnings over time. This transparency ensures confidence and motivation, fostering a productive environment.</p>
-    <button class="role-btn" onclick="goToSignup('earner')">Earner</button>
+    <button class="role-btn" onclick="goToSignup('earner')">Sign up as Earner</button>
   </section>
 
   <section id="admins">
@@ -403,4 +403,4 @@ window.addEventListener("scroll", () => {
 });
 </script>
 </body>
-</html>
+  </html>
