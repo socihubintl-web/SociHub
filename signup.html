@@ -7,7 +7,7 @@
 <style>
   * { box-sizing: border-box; }
   body, html { margin:0; padding:0; height:100%; font-family:Arial,sans-serif; background:#0f172a; color:#fff; }
-  .container { height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+  .container { height:100vh; display:none; flex-direction:column; overflow:hidden; }
   h1 { text-align:center; margin:30px 0 0; flex-shrink:0; font-weight:1000; font-size: 1.7rem; }
 
   .slider { display:flex; width:400%; transition:transform 0.4s ease; height: calc(100vh - 60px); }
@@ -45,6 +45,40 @@
     color:#00cc88;
     margin:10px 0;
   }
+  #roleSelectScreen{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:20px;
+}
+
+#roleSelectScreen h2{
+  color:#00cc99;
+}
+
+#roleSelect{
+  padding:14px;
+  font-size:16px;
+  border-radius:10px;
+  border:none;
+  width:220px;
+}
+
+#roleContinue{
+  background:#00cc99;
+  border:none;
+  padding:14px 25px;
+  border-radius:12px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+/* 🔒 Hide admin option */
+.admin-option{
+  display:none;
+}
 </style>
 </head>
 <body>
@@ -116,9 +150,21 @@
 <div id="verifyEmailSection">
   <h2>Verify Your Email</h2>
   <p>An email verification has been sent to <span id="userEmail"></span>.</p>
-  <p>Please check your inbox or spam folder and click the verification link.</p>
+  <p>Please check your inbox and click the verification link.</p>
   <button id="resendBtn"><a href="login.html">Login</a></button>
   <p id="resendMsg" style="color:red; margin-top:10px;"></p>
+</div>
+<div id="roleSelectScreen">
+  <h2>Sign up as?</h2>
+
+  <select id="roleSelect">
+    <option value="">-- Select role --</option>
+    <option value="client">Client</option>
+    <option value="earner">Earner</option>
+    <option value="admin" class="admin-option">Admin</option>
+  </select>
+
+  <button id="roleContinue">Continue</button>
 </div>
 </body>
 <script type="module">
@@ -145,17 +191,60 @@ const auth = getAuth(app);
 const db = getFirestore(app);
 
 /* ------------------ ROLE ------------------ */
-const params = new URLSearchParams(window.location.search);
-const role = params.get("role") || "admin";
-document.getElementById("roleTitle").innerText = `Sign Up as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+let role = null;
+
+const roleScreen = document.getElementById("roleSelectScreen");
+const container = document.querySelector(".container");
+const roleSelect = document.getElementById("roleSelect");
+const roleContinue = document.getElementById("roleContinue");
+
+roleContinue.onclick = () => {
+  if (!roleSelect.value) {
+    alert("Please select a role");
+    return;
+  }
+
+  role = roleSelect.value;
+
+  // Update title
+  document.getElementById("roleTitle").innerText =
+    `Sign Up as ${role.charAt(0).toUpperCase() + role.slice(1)}`;
+
+  // Update URL
+  history.replaceState({ step:0 }, "Step 0", `?role=${role}&step=0`);
+
+  // Hide role screen, show signup
+  roleScreen.style.display = "none";
+  container.style.display = "flex";
+
+  // ✅ Admin bio step logic goes here
+  if (role === "admin") {
+    const bioStep = document.getElementById("bioStep");
+    const next3 = document.getElementById("next3");
+    const bio = document.getElementById("bio");
+
+    if(bio && next3){
+      disable(next3,true);
+      bio.oninput = ()=>{
+        clearError(bio); disable(next3,true);
+        if(bio.value.length<30){ error(bio,"Minimum 30 characters"); return; }
+        disable(next3,false);
+      };
+      next3.onclick = ()=>goToStep(4);
+    }
+  } else {
+    // Remove bio step for non-admins
+    const bioStep = document.getElementById("bioStep");
+    if(bioStep) bioStep.remove();
+  }
+};
 
 /* ------------------ SLIDER ------------------ */
 const slider = document.getElementById("slider");
 let step = 0;
 
 // Conditional Bio step for admins
-const bioStep = document.getElementById("bioStep");
-if (role !== "admin" && bioStep) bioStep.remove();
+
 
 function goToStep(i){
   step = i;
@@ -226,7 +315,10 @@ nick.oninput = ()=>{
   if(nick.value.length>12){ error(nick,"Max 12 characters"); return; }
   disable(next25,false);
 };
-next25.onclick = ()=>goToStep(bioStep?3:4); // skip bio for non-admins
+next25.onclick = ()=>{
+  if(role === "admin") goToStep(3); // bio step index
+  else goToStep(3); // skip bio
+};
 
 /* ------------------ BIO (ADMIN ONLY) ------------------ */
 const next3 = document.getElementById("next3");
@@ -269,14 +361,14 @@ confirm.oninput = checkPasswords;
 signupBtn.onclick = async ()=>{
   try{
     const userCred = await createUserWithEmailAndPassword(auth,email.value.trim(),password.value);
-    await setDoc(doc(db,"users",userCred.user.uid),{
-      email: email.value.trim(),
-      name: name.value.trim(),
-      nickname: nick.value.trim(),
-      bio: bio?.value || "",
-      role: role,
-      createdAt: new Date()
-    });
+await setDoc(doc(db,"users",userCred.user.uid),{
+  email: email.value.trim(),
+  name: name.value.trim(),
+  nickname: nick.value.trim(),
+  bio: role === "admin" ? bio.value : "", // only admins have bio
+  role: role,
+  createdAt: new Date()
+});
     await sendEmailVerification(userCred.user);
 
     document.querySelector(".container").style.display="none";
@@ -335,4 +427,4 @@ function getFriendlyMessage(error) {
 
 </script>
 </body>
-</html>
+ </html>
