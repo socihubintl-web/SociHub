@@ -1,0 +1,2 @@
+User-agent: *
+Sitemap: https://socihubintl-web.github.io/SociHub/sitemap.xml
