@@ -1,0 +1,2474 @@
+<!DOCTYPE html>  <html lang="en">  
+<head>  
+  <meta charset="UTF-8" />  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />  
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">      
+  <title>Earner Dashboard</title>  
+  <style>  
+    body {  
+      font-family: Poppins, sans-serif;  
+      margin: 0;  
+      padding: 15px;  
+      background: #f4f4f4;  
+    }  
+    .welcome {  
+  font-size: 14px;  
+  font-weight: 200;  
+  margin-bottom: 15px;  
+}  .balance-card {
+background: #fff;
+padding: 15px;
+border-radius: 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+margin-bottom: 50px;
+}
+
+.balance-header {
+font-size: 18px;
+font-weight: 600;
+}
+
+.balance-amount {
+font-size: 24px;
+font-weight: 700;
+margin: 10px 0;
+}
+
+.withdraw-btn {
+background: #00cc88;
+color: #fff;
+font-size: 10px;
+border: none;
+padding: 10px 18px;
+border-radius: 5px;
+float: right;
+cursor: pointer;
+}
+.transcation-history {
+border: 1px solid #00cc88;
+color: #00cc88;
+margin-top: 7px;
+padding: 5px 10px;
+border-radius: 5px;
+float: left;
+cursor: pointer;
+font-size:10px;
+}
+.stats-section {
+margin-bottom: 30px ;
+}
+
+.stats-wrapper {
+margin-top: 50px;
+margin-bottom: 60px;
+display: flex;
+gap: 10px;
+}
+
+/* LEFT PERCENTAGE LABELS */
+.percent-labels {
+position: relative;
+left: 0;
+bottom: 25px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+gap: 6px;
+height: 180px;
+font-size: 10px;
+color: #666;
+}
+
+/* AREA HOLDING LINES + BARS */
+.stats-area {
+position: relative;
+width: 100%;
+}
+
+/* HORIZONTAL GUIDE LINES */
+.horizontal-lines {
+position: absolute;
+left: 0;
+top: -17px;
+width: 100%;
+height: 180px;
+display: flex;
+flex-direction: column;
+justify-content: space-between;
+pointer-events: none;
+}
+
+.horizontal-lines div {
+width: 100%;
+height: 1px;
+background: #ccc; /* Line color */
+opacity: 0.4;
+}
+
+/* BARS */
+.stats-bars {
+display: flex;
+justify-content: space-between;
+align-items: flex-end;
+height: 180px;
+padding-left: 10px;
+}
+
+.bar {
+width: 20px;
+border-radius: 6px 6px 0 0;
+position: relative;
+z-index: 5;   /* ✅ BAR COMES FRONT */
+}
+
+/* LABEL UNDER BAR */
+.bar-label {
+margin-top: 5px;
+font-size: 10px;
+text-align: center;
+margin-left: -10px;
+}
+
+.pending-tasks, .Available-tasks {
+background: #fff;
+padding: 15px;
+border-radius: 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+margin-bottom: 20px;
+}
+
+.task-item {
+padding: 10px 0;
+border-bottom: 1px solid #eee;
+font-size: 15px;
+}
+
+.task-item:last-child {
+border-bottom: none;
+}
+
+.Available-header {
+font-size: 16px;
+font-weight: 600;
+margin-bottom: 10px;
+}
+h1 {
+text-align: center;
+font-size: 2.3rem;
+margin-top: 20px auto;
+color: #00cc88;
+position: relative;
+top: -35px;
+right: 15px;
+width: 100%;
+padding: 10px;
+border-radius: 9px;
+box-shadow: 0 0 3px rgba(0,0,0,0.01);
+}
+h1 i{
+position: absolute;
+left: 9px;
+margin-left: 8px;
+bottom: 19px;
+font-size: 20px;
+}
+/* Slide-out Menu Panel */
+.side-menu {
+position: fixed;
+top: 0;
+left: -70%;
+width: 40%;
+height: 100%;
+background-color: #f0f0f0;
+transition: left 0.4s ease, background-color 0.3s ease;
+z-index: 999;
+padding: 20px 15px;
+}
+
+.side-menu.active {
+left: 0;
+}
+
+.side-menu .close-menu {
+font-size: 18px;
+color: #00cc88;
+cursor: pointer;
+margin-bottom: 20px;
+}
+
+.side-menu li {
+margin-bottom: 20px;
+color: black;
+font-size: 14px;
+display: flex;
+align-items: center;
+gap: 10px;
+border-bottom: 1px solid #ccc;
+transition: background 0.3s;
+}
+.side-menu ul {
+  list-style: none;
+  padding: 0;
+}
+.side-menu li i {
+color: #00cc88;
+}
+.stats-bars {
+display: flex;
+justify-content: space-between;
+align-items: flex-end;
+height: 180px;
+padding-left: 10px;
+}
+
+.bar-container {
+text-align: center;
+}
+
+.bar {
+width: 20px;
+border-radius: 6px 6px 0 0;
+height: 0; /* initial, will grow dynamically */
+}
+
+.bar.Available { background: blue; }
+.bar.completed { background: #00cc88; }
+.bar.rejected { background: red; }
+.bar.pending { background: #e8d400b7; }
+.bar.flagged { background: black; }
+.stats-bars {
+height: 180px;
+}
+.tasks-container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+max-height:550px;
+overflow-x:scroll;
+display: flex;
+flex-direction: column;
+gap: 15px;
+margin-top: 30px;
+margin-bottom:60px;
+}
+
+.task-card {
+background: #fff;
+border-radius: 12px;
+box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+padding: 15px;
+transition: transform 0.2s ease, box-shadow 0.2s ease;
+position: relative;
+
+}
+
+.task-card:hover {
+transform: translateY(-3px);
+box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.task-card h3 {
+margin: 0 0 40px 0;
+color: #00cc88;
+font-size: 1.2rem;
+}
+
+.descc{
+  outline:none;
+}
+
+.task-card p {
+font-size: 15px;
+margin: 30px 0;
+  line-height: 1.5;
+
+  display: -webkit-box;
+  -webkit-line-clamp: 3;     /* number of lines */
+  -webkit-box-orient: vertical;
+  text-overflow: ellipsis;
+}
+
+.task-card .task-link {
+display: inline-block;
+margin: 5px 0 10px 0;
+color: #0066cc;
+text-decoration: underline;
+font-size: 14px;
+}
+
+.task-card input[type="file"] {
+margin-top: 9px;
+color:red;
+}
+
+.complete-task-btn {
+background: #00cc88;
+color: #fff;
+border: none;
+padding: 10px 15px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 14px;
+margin-top: 20px;
+width: 100%;
+position: relative;
+  min-width: 140px;
+}
+  input {
+    outline:none;
+        border:none;
+  }
+  textarea {
+    
+    line-height: 1.7;
+    outline:none;
+        border:none;
+  }
+.complete-task-btn:hover {
+background: #00b377;
+}
+
+.task-status {
+position: absolute;
+top: 12px;
+right: 12px;
+padding: 3px 8px;
+font-size: 12px;
+border-radius: 8px;
+color: #fff;
+}
+.task-status.pending {
+  background: #ffcb30f0;
+  color: white;
+}
+.task-status.available { background: blue; }
+.task-status.completed { background: #5cb85c; }
+.task-status.rejected { background: red; }
+.bar {
+transition: height 0.5s ease;
+}
+.task-status.flagged{
+background: black;
+}
+.report-btn {
+position: absolute;
+top: 45px;
+left: 15px;
+color: #999;
+font-size: 16px;
+cursor: pointer;
+z-index: 5;
+}
+
+.report-btn:hover {
+color: red;
+}
+.report-modal {
+display: none;
+position: fixed;
+inset: 0;
+background: rgba(0,0,0,0.5);
+z-index: 3000;
+align-items: center;
+justify-content: center;
+}
+
+.modal-overlay {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-message {
+  color: #2b2b2b;
+  font-weight: bold;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-buttons button {
+  padding: 8px 18px;
+  font-size: 14px;
+  border:none;
+  background:#00cc88;
+  border-radius: 6px;
+  cursor:pointer;
+}
+.modal-contente {
+  color: #000;
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 65%;
+  text-align: center;
+  font-family: Poppins, sans-serif;
+}
+.report-box {
+background: #fff;
+width: 90%;
+max-width: 320px;
+padding: 20px;
+border-radius: 12px;
+}
+
+.report-actions {
+margin-top: 15px;
+display: flex;
+gap: 10px;
+}
+
+.report-actions button {
+flex: 1;
+padding: 10px;
+border: none;
+border-radius: 8px;
+cursor: pointer;
+}
+
+#submitReport {
+background: red;
+color: white;
+}
+
+#closeReport {
+background: #ccc;
+}
+.task-status.suspended {
+  background: #ff4500;
+  color: #fff;
+}
+
+.task-card.suspended {
+  opacity: 0.5;
+  border: 2px solid #ff4500;
+}
+.complete-task-btn.loading {
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.complete-task-btn .spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255,255,255,.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin .8s linear infinite;
+  display: inline-block;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.contact-section {
+  padding: 10px;
+  background: ;
+  color: #e5e7eb;
+}
+
+.contact-container {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.contact-text h2 {
+  font-size: 2.2rem;
+  color: #00ffcc;
+  margin-bottom: 15px;
+}
+
+.contact-text p {
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.contact-info {
+  margin-top: 5px;
+}
+
+.contact-info div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.contact-info i {
+  color: #00ffcc;
+  font-size: 1.1rem;
+}
+
+.contact-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 90%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px;
+  border-radius: 10px;
+  color: #fff;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+
+.contact-form textarea {
+  resize: none;
+  height: 130px;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #00ffcc;
+}
+
+.contact-form button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #00ffcc;
+  color: #020617;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.contact-form button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* 📱 Mobile */
+@media (max-width: 800px) {
+  .contact-container {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+<style>
+/* Dark Theme for your content */
+body.dark {
+  font-family: Poppins, sans-serif;
+  margin: 0;
+  padding: 15px;
+  background: #0f172a;  /* main dark background */
+  color: #e0e0e0;       /* general text color */
+}
+
+/* Welcome text */
+body.dark .welcome {
+  color: #c0c0c0;
+}
+
+/* Balance card */
+body.dark .balance-card {
+  background: #1e293b;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  color: #e0e0e0;
+}
+
+/* Balance header and amount */
+body.dark .balance-header {
+  color: #00cc88;
+}
+body.dark .balance-amount {
+  color: #00cc88;
+}
+
+/* Buttons */
+body.dark .withdraw-btn {
+  background: #00cc88;
+  color: #fff;
+}
+body.dark .transcation-history {
+  border: 1px solid #00cc88;
+  color: #00cc88;
+  background: transparent;
+}
+
+/* Stats section */
+body.dark .stats-section, 
+body.dark .stats-wrapper {
+  color: #e0e0e0;
+}
+
+/* Left percentage labels */
+body.dark .percent-labels {
+  color: #aaa;
+}
+
+/* Horizontal lines */
+body.dark .horizontal-lines div {
+  background: #555;
+  opacity: 0.3;
+}
+
+/* Bars */
+body.dark .bar.Available { background: #3b82f6; }
+body.dark .bar.completed { background: #00cc88; }
+body.dark .bar.rejected { background: #ef4444; }
+body.dark .bar.pending { background: #e8d400b7; }
+body.dark .bar.flagged { background: #000; }
+
+/* Task cards */
+body.dark .pending-tasks,
+body.dark .Available-tasks,
+body.dark .tasks-container,
+body.dark .task-card,
+body.dark .report-box,
+body.dark .modal-contente {
+  background: #1e293b;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.6);
+  color: #fff;
+}
+
+/* Task item borders */
+body.dark .task-item {
+  border-bottom: 1px solid #334155;
+}
+
+/* Task headers */
+body.dark .Available-header {
+  color: #00cc88;
+}
+
+/* Task card titles and descriptions */
+body.dark .task-card h3 {
+  color: #00cc88;
+}
+body.dark .task-card p {
+  color: #c0c0c0;
+}
+
+/* Task links */
+body.dark .task-card .task-link {
+  color: #3b82f6;
+}
+
+/* Inputs and textareas */
+body.dark input,
+body.dark textarea {
+  background: #1e293b;
+  color: #e0e0e0;
+  border: 1px solid #334155;
+}
+body.dark .modal-message {
+  color: #fff;}
+/* Complete task button */
+body.dark .complete-task-btn {
+  background: #00cc88;
+  color: #fff;
+}
+body.dark .complete-task-btn:hover {
+  background: #00b377;
+}
+
+/* Task status badges */
+body.dark .task-status.pending { background: #fbbf24; color: #000; }
+body.dark .task-status.available { background: #3b82f6; }
+body.dark .task-status.completed { background: #00cc88; }
+body.dark .task-status.rejected { background: #ef4444; }
+body.dark .task-status.flagged { background: #000; }
+body.dark .task-status.suspended { background: #ff4500; }
+
+/* Report modal overlay */
+body.dark .modal-overlay,
+body.dark .report-modal {
+  background: rgba(0,0,0,0.7);
+}
+
+/* Side menu */
+body.dark .side-menu {
+  background-color: #1e293b;
+}
+body.dark .side-menu li {
+  color: #e0e0e0;
+  border-bottom: 1px solid #334155;
+}
+body.dark .side-menu .close-menu {
+  color: #00cc88;
+}
+
+.slide-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 400px;
+  height: 100%;
+  background: #0f172a;
+  color: #fff;
+  box-shadow: -3px 0 15px rgba(0,0,0,0.5);
+  transition: right 0.4s ease;
+  z-index: 999;
+  padding: 20px;
+  overflow-y: auto;
+}
+.slide-panel.active { right: 0; }
+.close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  display: block;
+  text-align: right;
+}
+  .referral-container {
+    max-width: 420px;
+    margin: 40px auto;
+    padding: 20px;
+    background: rgba(255, 255, 255, 0.04);
+    border-radius: 16px;
+    text-align: center;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    color: #eaeaea;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(8px);
+  }
+  
+  /* Progress wrapper */
+  .progress-wrapper {
+    width: 100%;
+    height: 18px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    overflow: hidden;
+    margin: 18px 0 6px;
+    position: relative;
+  }
+  
+  /* Progress bar */
+  .progress-bar {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, #00ffcc, #00cc88);
+    border-radius: inherit;
+    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Referral count text */
+  #refCountText {
+    font-size: 0.85rem;
+    opacity: 0.85;
+    margin-bottom: 16px;
+  }
+  .profile-circle {
+    width: 120px;           /* adjust size if needed */
+    height: 120px;
+    border-radius: 50%;     /* makes it a circle */
+    object-fit: cover;      /* ensures image fills the circle, cropping if necessary */
+    border: 2px solid #00ffcc; /* optional border in your accent color */
+    display: block;
+    margin: 0 auto;         /* center horizontally */
+  }
+  /* ==========================
+     Profile Panel Styles
+  ========================== */
+  
+  /* Panel title */
+  .panel-title {
+    font-size: 1.5rem;
+    text-align: center;
+    margin-bottom: 25px;
+    color: #00ffcc;
+    font-weight: 600;
+  }
+  
+  /* Profile picture container */
+  .profile-picture-container {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 25px auto;
+  }
+  
+  .profile-circle {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover; /* fill the circle */
+    border: 2px solid #00ffcc;
+    background: #111; 
+  }
+  
+  /* Upload button (+) */
+  .upload-btn.buttonee {
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: #00ffcc;
+    color: #000;
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    transition: transform 0.2s, background 0.2s;
+  }
+  
+  .upload-btn.buttonee:hover {
+    transform: scale(1.1);
+    background: #00d6a6;
+  }
+  
+  /* Profile info sections */
+  .profile-info,
+  .reset-password,
+  .theme-toggle-container {
+    margin: 15px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  
+  /* Labels */
+  .label-name,
+  .label-password,
+  .label-theme {
+    font-weight: 600;
+    color: #00ffcc;
+    font-size: 0.95rem;
+  }
+  
+  /* Inputs */
+  .full-name-input,
+  .new-password-input {
+    padding: 10px 12px;
+    border: 1px solid #00ffcc;
+    border-radius: 8px;
+    background: #111;
+    color: #fff;
+    font-size: 0.9rem;
+    transition: box-shadow 0.2s;
+  }
+  
+  .full-name-input::placeholder,
+  .new-password-input::placeholder {
+    color: rgba(255,255,255,0.6);
+  }
+  
+  .full-name-input:focus,
+  .new-password-input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(0,255,204,0.4);
+  }
+  
+  /* Buttons */
+  .save-name-btn.buttonee,
+  .reset-pass-btn.buttonee,
+  .theme-toggle-btn.togglela,
+  #submitCode {
+    padding: 10px 14px;
+    background: #00ffcc;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #000;
+    font-size: 0.9rem;
+    transition: transform 0.2s, background 0.2s;
+  }
+  
+  .save-name-btn.buttonee:hover,
+  .reset-pass-btn.buttonee:hover,
+  .theme-toggle-btn.togglela:hover {
+    transform: scale(1.05);
+    background: #00d6a6;
+  }
+  
+  /* Feedback message */
+  .feedback {
+    font-size: 0.85rem;
+    color: #ff5555;
+    margin-top: 5px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 480px) {
+    .profile-picture-container {
+      width: 100px;
+      height: 100px;
+    }
+    .upload-btn.buttonee {
+      width: 28px;
+      height: 28px;
+      font-size: 20px;
+    }
+    .panel-title {
+      font-size: 1.3rem;
+    }
+  }
+  /* Your referral code display */
+  .my-code {
+    display: inline-block;
+    padding: 8px 14px;
+    margin: 12px 0;
+    font-weight: 600;
+    font-size: 1.05rem;
+    color: #00ffcc;
+    background: rgba(0, 255, 204, 0.1);
+    border-radius: 10px;
+    letter-spacing: 0.8px;
+  }
+  
+  /* Input field */
+  input[type="text"] {
+    width: 68%;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    font-size: 0.9rem;
+    background: rgba(255, 255, 255, 0.08);
+    color: #ccc;
+    transition: box-shadow 0.2s ease;
+  }
+  
+  input[type="text"]::placeholder {
+    color: #ccc;
+  }
+  
+  input[type="text"]:focus {
+    color: #ccc;
+    box-shadow: 0 0 0 2px rgba(0, 255, 204, 0.4);
+  }
+  
+  .social-media-section {
+    margin-top: 20px;
+    padding: 15px;
+    background: #rgba(0,0,0,0.3);
+    border-radius: 12px;
+    color: #ffffff;
+    font-family: Arial, sans-serif;
+  }
+  
+  .social-media-section h3.panel-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 8px;
+    color: #00ffcc;
+  }
+  
+  .social-media-section .instruction {
+    font-size: 0.9rem;
+    margin-bottom: 12px;
+    color: #ccc;
+  }
+  
+  .social-media-section .media-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .social-media-section .media-pair label {
+    font-weight: bold;
+    font-size: 0.85rem;
+    margin-top: 5px;
+  }
+  
+  .social-media-section .media-pair input {
+    width: 100%;
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #333;
+    background: #0f0f0f;
+    color: #fff;
+  }
+  
+  .social-media-section .media-pair input::placeholder {
+    color: #777;
+  }
+  
+  .social-media-section .bio-warning {
+    display: block;
+    font-size: 0.85rem;
+    color: #ff4c4c;
+    margin-bottom: 12px;
+  }
+  
+  .social-media-section .save-media-btn {
+    background: #00ffcc;
+    color: #000;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+  }
+  
+  .social-media-section .save-media-btn:hover {
+    background: #00e6b8;
+  }
+  
+  button:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(0, 255, 204, 0.35);
+  }
+  
+  button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  .feedback {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: red;
+  }
+  .profile-selector {
+    padding: 10px;
+    border: 1px solid #00ffcc;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 20px 0;
+  }
+  
+  .profile-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 11px;
+    position: absolute;
+    background: #fff;
+    border: 1px solid #00cc88;
+    border-radius: 6px;
+    margin-top: 4px;
+    z-index: 1000;
+    color:#000;
+    width: 90%;
+    height: auto;
+    margin-bottom: 20px;
+  }
+  
+  .profile-options.hidden {
+    display: none;
+  }
+</style>
+</head>  
+<body>  
+  <h1>SociHub<i class="fas fa-bars icon left-icon" id="openMenu"></i></h1>  
+      <!-- Slide-out Menu -->  <div id="side-menu" class="side-menu">          
+  <i class="fas fa-arrow-left close-menu"></i>          
+<ul>
+  <li id="profile">Profile</li>
+  <li id="referrals">Referrals</li>
+  <li id="theme-toggle">Themes</li>
+  <li id="about">FAQ</li>
+  <li id="contact">Contact us</li>
+  <li onclick="logout()">Logout</li>
+</ul>
+</div>
+<!-- Slide-in panel -->
+<div id="slidePanel" class="slide-panel">
+  <span id="closePanel" class="close-btn">&times;</span>
+  <div id="panelContent"></div>
+</div>
+  <div class="welcome">Welcome, <span id="Username">user</span> 👋</div>  <div class="balance-card">  
+    <div class="balance-header">Balance</div>  
+    <div class="balance-amount" id="balance">₦0.00</div>  
+    <button class="transcation-history" id="trans">Transcations</button>  
+    <button class="withdraw-btn" id="withdrawals">Withdraw</button>  
+    <div style="clear: both"></div>  
+  </div>  <div class="stats-section">  
+    <h3>Task Statistics</h3>  <div class="stats-wrapper">  
+  <!-- LEFT PERCENTAGE LABELS -->  
+  <div class="percent-labels">  
+    <div>100%</div>  
+    <div>90%</div>  
+    <div>80%</div>  
+    <div>70%</div>  
+    <div>60%</div>  
+    <div>50%</div>  
+    <div>40%</div>  
+    <div>30%</div>  
+    <div>20%</div>  
+    <div>10%</div>  
+    <div style="margin-left:4px;">0%</div>  
+  </div>    <!-- BARS + HORIZONTAL LINES -->    <div class="stats-area">  
+    <div class="horizontal-lines">  
+      <div></div><div></div><div></div><div></div><div></div>  
+      <div></div><div></div><div></div><div></div><div></div><div></div>  
+    </div>  <div class="stats-bars">  
+  <div class="bar-container">  
+    <div class="bar Available"></div>  
+    <div class="bar-label">Available</div>  
+  </div>    <div class="bar-container">  
+    <div class="bar completed"></div>  
+    <div class="bar-label">Completed</div>  
+  </div>    <div class="bar-container">  
+    <div class="bar rejected"></div>  
+    <div class="bar-label">Rejected</div>  
+  </div>    <div class="bar-container">  
+    <div class="bar pending"></div>  
+    <div class="bar-label">Pending</div>  
+  </div>    <div class="bar-container">  
+    <div class="bar flagged"></div>  
+    <div class="bar-label">Flagged</div>  
+  </div>  
+</div>  
+  </div>  
+</div>  
+  </div>   
+  <div id="tasksHeader" style="margin-bottom:15px; font-weight:600; font-size:16px;">  
+  Available Tasks: <span id="AvailableCount">0</span>  
+</div>  
+  <div id="tasksContainer" class="tasks-container"><span style="margin: 0 auto; padding:50px;">Loading...</span></div> 
+   <div id="tasksHeader" style="margin-bottom:15px; font-weight:600; font-size:16px;">  
+  Completed Tasks: <span id="completedCount">0</span>  
+</div>   
+  <div id="tasksCompleted" class="tasks-container"><span style="margin: 0 auto; padding:50px;">Loading...</span></div></div>
+    <div id="tasksHeader" style="margin-bottom:15px; font-weight:600; font-size:16px; margin-left:3px;">  
+  Rejected Tasks:  <span id="rejectedCount">0</span>  
+</div>   
+  <div id="tasksRejected" class="tasks-container" ><span style="margin: 0 auto; padding:50px;">Loading...</span></div> </div>
+     <div id="tasksHeader" style="margin-bottom:15px; font-weight:600; font-size:16px;">  
+  Pending Tasks: <span id="pendingCount">0</span>  
+</div>   
+  <div id="tasksPending" class="tasks-container"><span style="margin: 0 auto; padding:50px;">Loading...</span></div> </div>
+     <div id="tasksHeader" style="margin-bottom:15px; font-weight:600; font-size:16px;">  
+  Flagged Tasks: <span id="flaggedCount">0</span>  
+</div>   
+  <div id="tasksflagged" class="tasks-container"><span style="margin: 0 auto; padding:50px;">Loading...</span></div> 
+</div>
+  <!-- REPORT MODAL -->  
+<div id="reportModal" style="  
+  display:none;  
+  position:fixed;  
+  inset:0;  
+  background:rgba(0,0,0,0.5);  
+  z-index:2000;  
+  align-items:center;  
+  justify-content:center;  
+">  
+  <div style="  
+    background:#fff;  
+    width:80%;  
+    color:#000;
+    max-width:320px;  
+    padding:20px;  
+    border-radius:12px;  
+  ">  
+    <h3 style="margin-top:0;">Report Task</h3>  <label style="display:block;margin-bottom:8px;">  
+  <input type="radio" name="reportReason" value="Invalid link">  
+  Invalid link  
+</label>  
+
+<label style="display:block;margin-bottom:8px;">  
+  <input type="radio" name="reportReason" value="Didn't understand the description">  
+  Didn't understand the description  
+</label>  
+
+<div style="margin-top:15px;display:flex;gap:10px;">  
+  <button id="submitReport" style="  
+    flex:1;  
+    background:red;  
+    color:#fff;  
+    border:none;  
+    padding:10px;  
+    border-radius:8px;  
+    cursor:pointer;">Submit</button>  
+
+  <button id="closeReport" style="  
+    flex:1;  
+    background:#ccc;  
+    border:none;  
+    padding:10px;  
+    border-radius:8px;  
+    cursor:pointer;  
+  ">Cancel</button>  
+</div>
+
+  </div>  
+</div>  
+<div id="alertModal" class="modal-overlay" style="display:none;">
+  <div class="modal-contente">
+    <div id="alertModalMessage" class="modal-message"></div>
+    <div class="modal-buttons">
+      <button id="alertModalOkBtn">OK</button>
+    </div>
+  </div>
+</div>
+
+
+<script type="module">  
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";  
+import { getAuth, onAuthStateChanged, signOut, sendPasswordResetEmail } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";  
+import { getFirestore, collection, query, where, doc, getDoc, setDoc, updateDoc, onSnapshot, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";  
+  
+// ---------------- FIREBASE CONFIG ----------------  
+const firebaseConfig = {  
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",  
+  authDomain: "socihub-a2731.firebaseapp.com",  
+  projectId: "socihub-a2731",  
+  storageBucket: "socihub-a2731.firebasestorage.app",  
+  messagingSenderId: "815252223754",  
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",  
+  measurementId: "G-KXW58D7RGM"  
+};  
+  
+const REQUIRED_ROLE = "earner";  
+  
+// ---------------- INITIALIZE FIREBASE ----------------  
+const app = initializeApp(firebaseConfig);  
+const auth = getAuth(app);  
+const db = getFirestore(app);  
+  
+// ---------------- DOM ELEMENTS ----------------  
+const usernameDisplay = document.getElementById("Username");  
+const balanceDisplay = document.getElementById("balance");  
+const AvailableContainer = document.getElementById("tasksContainer");  
+const completedContainer = document.getElementById("tasksCompleted");  
+const rejectedContainer = document.getElementById("tasksRejected");  
+const pendingContainer = document.getElementById("tasksPending");  
+const flaggedContainer = document.getElementById("tasksflagged");  
+const pendingCountEl = document.getElementById("pendingCount"); 
+const AvailableCountEl = document.getElementById("AvailableCount");
+const completedCountEl = document.getElementById("completedCount");
+const rejectedCountEl = document.getElementById("rejectedCount");   
+const flaggedCountEl = document.getElementById("flaggedCount"); 
+  
+const MAX_BAR_HEIGHT = 180;  
+const barElements = {  
+  Available: document.querySelector(".bar.Available"),  
+  completed: document.querySelector(".bar.completed"),  
+  rejected: document.querySelector(".bar.rejected"),  
+  pending: document.querySelector(".bar.pending"),  
+  flagged: document.querySelector(".bar.flagged")  
+};  
+  
+  window.logout = function() {
+    signOut(auth)
+      .then(() => {
+        window.location.href = "1page.html"; // Redirect after logout
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
+  };
+  
+  function showAlertModal(message, okBtn = true) {
+  return new Promise(resolve => {
+    const modal = document.getElementById("alertModal");
+    const msg = document.getElementById("alertModalMessage");
+    const okButton = document.getElementById("alertModalOkBtn");
+
+    msg.textContent = message;
+
+    if (okBtn) {
+      okButton.style.display = "inline-block";
+    } else {
+      okButton.style.display = "none";
+    }
+
+    // Show modal
+    modal.style.display = "flex";
+
+    // OK button click
+    okButton.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    // Click outside modal to close (optional)
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        resolve(false);
+      }
+    };
+  });
+}
+// ---------------- MENU LOGIC ----------------  
+const menuBtn = document.getElementById("openMenu");  
+const closeoBtn = document.querySelector(".close-menu");  
+const sideMenu = document.getElementById("side-menu");  
+  
+menuBtn.addEventListener("click", () => sideMenu.classList.add("active"));  
+closeoBtn.addEventListener("click", () => sideMenu.classList.remove("active"));  
+document.addEventListener("click", (event) => {  
+  if (sideMenu.classList.contains("active") && !sideMenu.contains(event.target) && event.target !== menuBtn) {  
+    sideMenu.classList.remove("active");  
+  }  
+});  
+  
+// ---------------- CONTAINERS MAP ----------------  
+const containers = {  
+  Available: AvailableContainer,  
+  suspended: AvailableContainer, // Suspended stays with Available  
+  completed: completedContainer,  
+  rejected: rejectedContainer,  
+  pending: pendingContainer,  
+  flagged: flaggedContainer  
+};  
+  
+// ---------------- CREATE TASK CARD ----------------  
+function createTaskView(taskData) {
+  const status = taskData.status || "Available";
+  const lowerStatus = status.toLowerCase();
+  const container = containers[lowerStatus] || AvailableContainer;
+
+  // Create task card
+  const taskDiv = document.createElement("div");
+  taskDiv.classList.add("task-card", lowerStatus);
+  taskDiv.innerHTML = `
+    <i class="fa-solid fa-thumbs-down report-btn"></i>
+    <span class="task-status ${lowerStatus}">${status}</span>
+    <h3>${taskData.title}</h3>
+      <textarea class="descc" rows="4" readonly> ${taskData.description}</textarea> 
+    <p><strong>Reward:</strong> ₦${taskData.reward}</p>
+    <a href="${taskData.link}" target="_blank" class="task-link">Open Post</a>
+    <div class="submission-area">
+     <div class="profile-selector">
+  <span class="selected-text">Select profile</span>
+  <i class="fa-solid fa-caret-down"></i>
+</div>
+
+<div class="profile-options hidden"></div>
+      <label class="upload-label">Upload Proof</label>
+      <input type="file" accept="image/*,video/*" class="proof-input">
+      <button class="complete-task-btn" disabled>Submit Task</button>
+    </div>
+  `;
+
+  // Append based on status
+  if (lowerStatus === "suspended") {
+    // Suspended tasks go after all existing children in Available container
+    container.appendChild(taskDiv);
+  } // Append based on status
+if (lowerStatus === "Available" || lowerStatus === "suspended") {
+  // Collect existing suspended tasks
+  const suspendedTasks = container.querySelectorAll(".task-card.suspended");
+  if (lowerStatus === "Available") {
+    // Available goes before first suspended task (if any), else at end
+    if (suspendedTasks.length > 0) {
+      container.insertBefore(taskDiv, suspendedTasks[0]);
+    } else {
+      container.appendChild(taskDiv);
+    }
+  } else {
+    // Suspended always goes last
+    container.appendChild(taskDiv);
+  }
+} else {
+  // All other statuses
+  container.appendChild(taskDiv);
+}
+
+  // DOM elements
+  const reportBtn = taskDiv.querySelector(".report-btn");
+  const fileInput = taskDiv.querySelector(".proof-input");
+  const submitBtn = taskDiv.querySelector(".complete-task-btn");
+  const submissionArea = taskDiv.querySelector(".submission-area");
+  const taskLink = taskDiv.querySelector(".task-link");
+const profileSelector = taskDiv.querySelector(".profile-selector");
+  const profileOptionsBox = taskDiv.querySelector(".profile-options");
+  const selectedText = profileSelector.querySelector(".selected-text");
+  // Open / close profile dropdown
+profileSelector.addEventListener("click", (e) => {
+  e.stopPropagation(); // important
+  profileOptionsBox.classList.toggle("hidden");
+});
+
+// Close dropdown when clicking outside
+document.addEventListener("click", () => {
+  profileOptionsBox.classList.add("hidden");
+});
+  // Report button
+  reportBtn.addEventListener("click", () => openReportModal(taskData.id));
+
+  // Status-based visibility
+  if (status === "Available") {
+    fileInput.addEventListener("change", () => {
+      submitBtn.disabled = !fileInput.files.length;
+    });
+  }
+
+  if (status === "Pending") {
+    const uploadLabel = submissionArea.querySelector(".upload-label");
+    if (uploadLabel) uploadLabel.style.display = "none";
+    reportBtn.style.display = "none";
+    fileInput.style.display = "none";
+    profileSelector.style.display = "none";
+    submitBtn.style.display = "none";
+    if (taskLink) taskLink.style.display = "none";
+
+    if (taskData.submission?.fileName) {
+      const fileViewLink = document.createElement("a");
+      fileViewLink.href = taskData.submission.fileURL || "#";
+      fileViewLink.target = "_blank";
+      fileViewLink.textContent = `View uploaded file`;
+      fileViewLink.style.display = "block";
+      fileViewLink.style.marginTop = "10px";
+      submissionArea.appendChild(fileViewLink);
+    }
+  }
+
+  if (status === "Completed" || status === "Suspended") {
+    reportBtn.style.display = "none";
+    submissionArea.style.display = "none";
+    profileSelector.style.display = "none";
+    if (taskLink) taskLink.style.display = "none";
+  }
+    if (status === "flagged") {
+      profileSelector.style.display = "none";
+    reportBtn.style.display = "none";
+    submissionArea.style.display = "none";
+  }
+if (status === "rejected") {
+  reportBtn.style.display = "none";
+const reasonText = taskData.rejectionReason || "No reason provided";
+
+  // Create a paragraph element
+  const reasonP = document.createElement("p");
+  reasonP.style.color = "#ccc";
+  reasonP.style.fontSize = "13px";
+  reasonP.textContent = `Task was rejected due to ${reasonText}`;
+
+  // Append it to the task card (without overwriting existing innerHTML)
+  taskDiv.appendChild(reasonP);
+}
+  // Submit logic
+if (status === "Available" || status === "rejected") {
+
+  fileInput.addEventListener("change", () => {
+    submitBtn.disabled = !fileInput.files.length;
+  });
+
+  submitBtn.addEventListener("click", async () => {
+    if (!fileInput.files.length) return;
+
+    setButtonLoading(submitBtn, true);
+
+    const user = auth.currentUser;
+    if (!user) {
+      await showAlertModal("Not authenticated");
+      setButtonLoading(submitBtn, false);
+      return;
+    }
+
+    const userRef = doc(db, "users", user.uid);
+    const taskRef = doc(db, "tasks", taskData.id);
+
+    try {
+      const snap = await getDoc(userRef);
+      if (!snap.exists()) throw new Error("User not found");
+
+      const userData = snap.data();
+
+      // ---------------- REQUIRED MEDIA CHECK ----------------
+      const requiredPlatforms = [
+        { key: "facebook", label: "FB" },
+        { key: "whatsapp", label: "WAP" },
+        { key: "instagram", label: "INTGM" }
+      ];
+
+      const missing = requiredPlatforms.filter(p => !userData[p.key]);
+
+      if (missing.length) {
+        await showAlertModal(
+          "Please set up the following profile(s) in your account:\n\n" +
+          missing.map(m => m.label).join(", ")
+        );
+        setButtonLoading(submitBtn, false);
+        return;
+      }
+
+// Build profile options ONCE
+profileOptionsBox.innerHTML = "";
+
+requiredPlatforms.forEach(p => {
+  if (userData[p.key]) {
+    const opt = document.createElement("div");
+    opt.className = "profile-option";
+    opt.textContent = `${p.label}: ${userData[p.key]}`;
+
+    opt.addEventListener("click", () => {
+      profileSelector.dataset.platform = p.key;
+      profileSelector.dataset.value = userData[p.key];
+      selectedText.textContent = `${p.label}: ${userData[p.key]}`;
+      profileOptionsBox.classList.add("hidden");
+    });
+
+    profileOptionsBox.appendChild(opt);
+  }
+});
+
+      // ---------------- BLOCK IF NO PROFILE SELECTED ----------------
+      const selectedPlatform = profileSelector.dataset.platform;
+      const selectedValue = profileSelector.dataset.value;
+
+      if (!selectedPlatform || !selectedValue) {
+        await showAlertModal("Please select a profile before submitting.");
+        setButtonLoading(submitBtn, false);
+        return;
+      }
+
+      // ---------------- UPLOAD ----------------
+      const file = fileInput.files[0];
+
+      const fileURL = await withTimeout(
+        uploadToCloudinary(file, {
+          preset: "deposit_preset",
+          cloudName: "dp0qteuda"
+        }),
+        60000
+      );
+
+      await updateDoc(taskRef, {
+        status: "Pending",
+        submission: {
+          taskId: taskData.id,
+          submittedBy: user.uid,
+          submittedByName: userData.name || "Unknown",
+          assignedTo: user.uid,
+          submittedAt: new Date(),
+          selectedProfile: {
+            platform: selectedPlatform,
+            value: selectedValue
+          },
+          fileName: file.name,
+          fileType: file.type,
+          fileSize: file.size,
+          fileURL
+        }
+      });
+
+      await showAlertModal("Task submitted and pending review");
+
+    } catch (err) {
+      console.error(err);
+      submitBtn.textContent = "Try again";
+      submitBtn.disabled = false;
+      await showAlertModal(err.message || "Upload failed.");
+    } finally {
+      if (!submitBtn.disabled) setButtonLoading(submitBtn, false);
+    }
+  });
+}}
+ async function uploadToCloudinary(
+  file,
+  {
+    cloudName = "dp0qteuda",
+    preset = "deposit_preset",
+    timeout = 60000
+  } = {}
+) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", preset);
+
+    const res = await fetch(
+      `https://api.cloudinary.com/v1_1/${cloudName}/upload`,
+      {
+        method: "POST",
+        body: formData,
+        signal: controller.signal
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Network error while uploading");
+    }
+
+    const data = await res.json();
+
+    if (data.error) {
+      throw new Error(data.error.message || "Cloudinary upload failed");
+    }
+
+    if (!data.secure_url) {
+      throw new Error("Upload succeeded but no file URL returned");
+    }
+
+    return data.secure_url;
+
+  } catch (err) {
+    if (err.name === "AbortError") {
+      throw new Error("Upload timed out. Please try again.");
+    }
+    throw err;
+  } finally {
+    clearTimeout(timer);
+  }
+} 
+// ---------------- EMPTY STATE ----------------  
+function showEmptyState(container, text) {  
+  if (!container.children.length) {  
+    container.innerHTML = `<p style="text-align:center; font-size:13px; color:#999; padding:20px 10px;">${text}</p>`;  
+  }  
+  // Always show flagged warning  
+  if (container === flaggedContainer) {  
+    const warningMessage = document.createElement("p");  
+    warningMessage.style.color = "red";  
+    warningMessage.style.fontSize = "10px";  
+    warningMessage.innerHTML = '<i class="fas fa-warning" style="color: orange;"></i> If you\'re being flagged for a post thrice, your account will be banned.';  
+    container.appendChild(warningMessage);  
+  }  
+}  
+  
+// ---------------- LOAD TASKS ----------------  
+function loadTasksForEarner() {    
+  const tasksRef = collection(db, "tasks");    
+  const q = query(tasksRef, where("assignedTo", "==", auth.currentUser.uid));    
+
+  onSnapshot(q, (querySnap) => {    
+    // Clear all containers first    
+    Object.values(containers).forEach(c => c.innerHTML = "");    
+
+    const tasks = [];
+    querySnap.forEach(docSnap => {
+      const t = { id: docSnap.id, ...docSnap.data() };
+      // ❌ Skip hidden tasks
+      if (t.status === "hidden") return;
+      tasks.push(t);
+    });    
+
+    tasks.forEach(task => createTaskView(task));    
+
+    // Count statuses    
+    const completed = tasks.filter(t => t.status === "Completed").length;    
+    const pending = tasks.filter(t => t.status === "Pending").length;    
+    const Available = tasks.filter(t => t.status === "Available").length;    
+    const rejected = tasks.filter(t => t.status === "rejected").length;    
+    const flagged = tasks.filter(t => t.status === "flagged").length;    
+
+    AvailableCountEl.textContent = Available;   
+    rejectedCountEl.textContent = rejected;    
+    completedCountEl.textContent = completed;    
+    pendingCountEl.textContent = pending;  
+    flaggedCountEl.textContent = flagged;     
+
+    // Update bars    
+    barElements.Available.style.height = Math.min(Available * 0.5, 100) / 100 * MAX_BAR_HEIGHT + "px";    
+    barElements.completed.style.height = Math.min(completed * 0.5, 100) / 100 * MAX_BAR_HEIGHT + "px";    
+    barElements.pending.style.height = Math.min(pending * 2, 100) / 100 * MAX_BAR_HEIGHT + "px";    
+    barElements.rejected.style.height = Math.min(rejected * 2, 100) / 100 * MAX_BAR_HEIGHT + "px";    
+
+    // Show empty states    
+    showEmptyState(AvailableContainer, "No Available tasks yet");    
+    showEmptyState(completedContainer, "No completed tasks");    
+    showEmptyState(rejectedContainer, "No rejected tasks");    
+    showEmptyState(pendingContainer, "No pending tasks");    
+    showEmptyState(flaggedContainer, "No flagged tasks");    
+  });    
+}
+ // ---------------- BUTTON LOADING ----------------
+function setButtonLoading(btn, loading, text = "Submit Task") {
+  if (loading) {
+    btn.dataset.originalText = btn.textContent;
+    btn.innerHTML = `<span class="spinner"></span>`;
+    btn.classList.add("loading");
+    btn.disabled = true;
+  } else {
+    btn.textContent = text || btn.dataset.originalText;
+    btn.classList.remove("loading");
+    btn.disabled = false;
+  }
+}
+
+// ---------------- PROMISE TIMEOUT ----------------
+function withTimeout(promise, ms = 60000) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) =>
+      setTimeout(() => reject(new Error("Upload timeout")), ms)
+    )
+  ]);
+} 
+// ---------------- AUTH STATE ----------------  
+onAuthStateChanged(auth, async (user) => {
+  // 🚪 Not logged in
+  if (!user) {
+    window.location.href = "login.html"; // or 1page.html (pick ONE)
+    return;
+  }
+
+  currentUserId = user.uid;
+  const userRef = doc(db, "users", currentUserId);
+
+  try {
+    const snap = await getDoc(userRef);
+
+    // 🚫 User record missing
+    if (!snap.exists()) {
+      window.location.href = "no_access.html";
+      return;
+    }
+
+    const data = snap.data();
+
+    // ❌ Role check (EARNER ONLY)
+    if (data.role !== REQUIRED_ROLE) {
+      window.location.href = "no_access.html";
+      return;
+    }
+
+    // 🚫 Ban / Flag limit check
+    if (data.accountStatus === "banned" || (data.stats?.flagged ?? 0) >= 99) {
+      document.body.innerHTML = `
+        <div style="
+          position:fixed;
+          inset:0;
+          background:#000;
+          color:#fff;
+          display:flex;
+          flex-direction:column;
+          justify-content:center;
+          align-items:center;
+          text-align:center;
+          padding:20px;
+          z-index:9999;
+        ">
+          <h1 style="color:red;">Account Disabled</h1>
+          <p>Your account has been disabled due to repeated flagged tasks.</p>
+        </div>
+      `;
+      return;
+    }
+
+    // 📊 INIT STATS (ONCE)
+    if (!data.stats) {
+      const defaultStats = {
+        Available: 0,
+        completed: 0,
+        pending: 0,
+        rejected: 0,
+        flagged: 0
+      };
+
+      await setDoc(userRef, { stats: defaultStats }, { merge: true });
+      data.stats = defaultStats;
+    }
+
+    // 🎟️ REFERRAL CODE (GENERATE ONCE)
+    if (!data.referralCode) {
+      const code = generateReferralCode();
+      await updateDoc(userRef, { referralCode: code });
+      myReferralCode = code;
+    } else {
+      myReferralCode = data.referralCode;
+    }
+
+    hasUsedReferral = data.usedReferralCode === true;
+
+    // 👤 UI
+    usernameDisplay.textContent = data.nickname || "user";
+    balanceDisplay.textContent =
+      "₦" + (data.balance ?? 10.3).toLocaleString();
+
+    // 📈 RENDER STAT BARS (SAFE)
+    Object.keys(barElements).forEach(stat => {
+      const value = data.stats?.[stat] ?? 0;
+      barElements[stat].style.height =
+        (Math.min(value, 100) / 100) * MAX_BAR_HEIGHT + "px";
+    });
+
+    // 📥 LOAD TASKS (ONCE)
+    loadTasksForEarner();
+
+  } catch (err) {
+    console.error("User load error:", err);
+    window.location.href = "no_access.html";
+  }
+});
+// ---------------- REPORT MODAL ----------------  
+const reportModal = document.getElementById("reportModal");  
+const closeReportBtn = document.getElementById("closeReport");  
+const submitReportBtn = document.getElementById("submitReport");  
+let reportedTaskId = null;  
+  
+function openReportModal(taskId) {  
+  reportedTaskId = taskId;  
+  reportModal.style.display = "flex";  
+}  
+  
+closeReportBtn.addEventListener("click", () => {  
+  reportModal.style.display = "none";  
+  reportedTaskId = null;  
+});  
+  
+submitReportBtn.addEventListener("click", async () => {  
+  const selected = document.querySelector('input[name="reportReason"]:checked');  
+  if (!selected) { await showAlertModal("Please select a reason"); return; }  
+  
+  try {  
+    const user = auth.currentUser;  
+    const userSnap = await getDoc(doc(db, "users", user.uid));  
+    const userData = userSnap.data();  
+    const taskRef = doc(db, "tasks", reportedTaskId);  
+    const taskSnap = await getDoc(taskRef);  
+    const taskData = taskSnap.data();  
+  
+    await updateDoc(taskRef, {  
+      status: "Suspended",  
+      suspension: {  
+        reason: selected.value,  
+        reportedBy: user.uid,  
+        reportedByName: userData.name || "Unknown",  
+        projectCode: taskData.projectCode || null,  
+        link: taskData.link || null,  
+        description: taskData.description || null,  
+        suspendedAt: new Date()  
+      }  
+    });  
+  
+    await showAlertModal("Task has been suspended and sent to admin review");  
+    reportModal.style.display = "none";  
+    reportedTaskId = null;  
+  
+  } catch (err) {  
+    console.error("Suspend error:", err);  
+    await showAlertModal("Failed to suspend task");  
+  }  
+});  
+let myReferralCode = null;
+let currentUserId = null;
+const REFERRAL_LIMIT = 20;
+const MILESTONE_REWARD = 200;
+const REFEREE_REWARD = 10; 
+const REFERRER_REWARD = 0;
+let hasUsedReferral = false;
+document.getElementById("referrals").addEventListener("click", async () => {
+  if (!currentUserId || !myReferralCode) {
+    await showAlertModal("Loading referral info, please wait...");
+    return;
+  }
+
+  openPanel(`
+    <div class="referral-container">
+      <h2>Your Referral Progress</h2>
+
+      <div class="progress-wrapper">
+        <div class="progress-bar" id="refProgress"></div>
+        <span id="refCountText">0 / 20 referrals</span>
+      </div>
+
+      <p>Your referral code:</p>
+      <div class="my-code" id="myCode">---</div>
+
+      <div id="claimSection">
+        <hr>
+        <p>Enter a referral code you received:</p>
+        <input type="text" id="enterCode" placeholder="Enter referral code">
+        <button id="submitCode">Submit Code</button>
+        <p id="referralFeedback" class="feedback"></p>
+      </div>
+    </div>
+  `);
+
+  // 🟢 Function to update button based on network
+  function updateReferralButtonNetworkState() {
+    const btn = document.getElementById("submitCode");
+    if (!btn) return;
+
+    if (!navigator.onLine) {
+      btn.style.display = "none"; // hide when offline
+    }
+  }
+
+  // 🟢 Initial check
+  updateReferralButtonNetworkState();
+
+  // 🟢 Listen for network changes
+
+  window.addEventListener("offline", updateReferralButtonNetworkState);
+
+  // 🟢 Prevent offline submission
+  document.getElementById("submitCode")?.addEventListener("click", async () => {
+    if (!navigator.onLine) {
+      alert("You are offline. Connect to the internet to submit the referral code.");
+      return;
+    }
+
+    // ✅ Your referral submission code here
+    console.log("Referral code submitted!");
+  });
+
+  // Fill own code
+  document.getElementById("myCode").textContent = myReferralCode;
+
+  // Load fresh user data
+  const snap = await getDoc(doc(db, "users", currentUserId));
+  const data = snap.data();
+
+  // Update progress (earned referrals ONLY)
+  updateProgress(data?.referrals || 0);
+
+  // Hide claim UI if already used a referral
+  if (data?.usedReferralCode === true) {
+    document.getElementById("claimSection").style.display = "none";
+  } else {
+const submitBtn = document.getElementById("submitCode");
+if (submitBtn) {
+  submitBtn.onclick = handleReferralSubmit;
+}
+  }
+});
+
+function generateReferralCode() {
+  return "AE" + Math.random().toString(36).substring(2, 9).toUpperCase();
+}
+function updateProgress(count) {
+  const max = 20;
+  const percent = Math.min((count / max) * 100, 100);
+
+  const bar = document.getElementById("refProgress");
+  const text = document.getElementById("refCountText");
+
+  if (bar) bar.style.width = percent + "%";
+  if (text) text.textContent = `${count} / ${max} referrals`;
+}
+
+async function handleReferralSubmit() {
+  const input = document.getElementById("enterCode");
+  const feedback = document.getElementById("referralFeedback");
+  const claimSection = document.getElementById("claimSection");
+
+  if (!input || !feedback) return;
+
+  const enteredCode = input.value.trim().toUpperCase();
+  if (!enteredCode) {
+    feedback.textContent = "Enter a referral code.";
+    return;
+  }
+
+  const userRef = doc(db, "users", currentUserId);
+  const userSnap = await getDoc(userRef);
+  if (!userSnap.exists()) return;
+
+  const userData = userSnap.data();
+
+  // 🔒 Already used referral
+  if (userData.usedReferralCode === true) {
+    feedback.textContent = "You have already claimed a referral reward.";
+    return;
+  }
+
+  // 🚫 Self referral
+  if (enteredCode === userData.referralCode) {
+    feedback.textContent = "You cannot use your own referral code.";
+    return;
+  }
+
+  // 🔍 Find referrer
+  const q = query(
+    collection(db, "users"),
+    where("referralCode", "==", enteredCode)
+  );
+
+  const qsnap = await getDocs(q);
+  if (qsnap.empty) {
+    feedback.textContent = "Invalid referral code.";
+    return;
+  }
+
+  const referrerRef = qsnap.docs[0].ref;
+
+  try {
+    await runTransaction(db, async (tx) => {
+      const freshUser = await tx.get(userRef);
+      if (freshUser.data().usedReferralCode === true) {
+        throw "Referral already used";
+      }
+
+      const referrerSnap = await tx.get(referrerRef);
+      if (!referrerSnap.exists()) throw "Referrer missing";
+
+      const referrerData = referrerSnap.data();
+      const currentRefs = referrerData.referrals || 0;
+      const newRefs = currentRefs + 1;
+
+      // 👤 update claimer
+      tx.update(userRef, {
+        usedReferralCode: true,
+        referredBy: enteredCode,
+        balance: increment(REFEREE_REWARD)
+      });
+
+      // 👑 update referrer
+      const referrerUpdates = {
+        referrals: newRefs
+      };
+
+      // 🎉 milestone reward (ONCE)
+      if (
+        newRefs >= REFERRAL_LIMIT &&
+        referrerData.referralMilestone20Claimed !== true
+      ) {
+        referrerUpdates.balance = increment(MILESTONE_REWARD);
+        referrerUpdates.referralMilestone20Claimed = true;
+        referrerUpdates.notifications = arrayUnion({
+          type: "referral_reward",
+          message: "🎉 Congrats! You’ve earned ₦200 for completing your 20 referrals.",
+          amount: 200,
+          createdAt: serverTimestamp()
+        });
+      }
+
+      tx.update(referrerRef, referrerUpdates);
+    });
+
+    await showAlertModal(
+  "🎉 Congratulations!\nYou have successfully claimed a referral reward."
+);
+
+feedback.textContent = "Referral reward claimed successfully 🎉";
+if (claimSection) claimSection.style.display = "none";
+
+  } catch (err) {
+    console.error(err);
+    feedback.textContent = "Something went wrong. Try again.";
+  }
+}
+
+document.getElementById("profile").addEventListener("click", async () => {
+const user = auth.currentUser;
+if (!user) return showAlertModal("User not logged in!");
+
+// Get existing user info from Firestore
+const userDoc = await getDoc(doc(db, "users", user.uid));
+const userData = userDoc.exists() ? userDoc.data() : { name: "", profilePic: "" };
+
+const panelContentHTML = `
+<h2 class="panel-title">Profile</h2>
+
+<div class="profile-picture-container">  
+  <img src="${userData.profilePic || 'https://via.placeholder.com/120'}" class="profile-circle" id="profilePicDisplay">  
+  <button class="upload-btn buttonee" id="uploadProfileBtn">+</button>  
+  <input type="file" id="profileFileInput" accept="image/*" style="display:none">  
+</div>  
+
+<div class="profile-info">  
+  <label class="label-name">Nick Name</label>  
+  <input type="text" id="fullNameInput" class="full-name-input" value="${userData.nickname}">  
+  <button class="save-name-btn buttonee" id="saveNameBtn">Save Name</button>  
+</div>  
+
+<div class="reset-password">  
+  <label class="label-password">New Password</label>  
+  <button class="reset-pass-btn buttonee" id="resetPassBtn">Reset Password</button>  
+</div>  
+
+<div class="theme-toggle-container">  
+  <label class="label-theme">Toggle Theme</label>  
+  <button class="theme-toggle-btn togglela" id="panelThemeToggle">Switch Theme</button>  
+</div>
+<div class="social-media-section">
+  <h3 class="panel-subtitle">Social Media Names</h3>
+  <p class="instruction">
+    Upload your media names so they can be tracked for your tasks before you are rewarded.
+  </p>
+
+  <div class="media-inputs">
+    <!-- Example repeated for each platform -->
+    <div class="media-pair">
+      <label>Facebook Name</label>
+      <input type="text" id="facebookInput" placeholder="Enter Facebook name" value="${userData.facebook || ''}">
+<br><br>
+      <input type="text" id="facebookLinkInput" placeholder="Enter Facebook profile link" value="${userData.facebookLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>WhatsApp Name</label>
+      <input type="text" id="whatsappInput" placeholder="Enter WhatsApp name" value="${userData.whatsapp || ''}">
+<br><br>
+      <input type="text" id="whatsappLinkInput" placeholder="Enter WhatsApp number" value="${userData.whatsappLink|| ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>TikTok Name</label>
+      <input type="text" id="tiktokInput" placeholder="Enter TikTok name" value="${userData.tiktok || ''}">
+<br><br>
+      <input type="text" id="tiktokLinkInput" placeholder="Enter TikTok profile link" value="${userData.tiktokLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>Instagram Name</label>
+      <input type="text" id="instagramInput" placeholder="Enter Instagram name" value="${userData.instagram || ''}">
+<br><br>
+      <input type="text" id="instagramLinkInput" placeholder="Enter Instagram profile link" value="${userData.instagramLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>Snapchat Name</label>
+      <input type="text" id="snapchatInput" placeholder="Enter Snapchat name" value="${userData.snapchat || ''}">
+<br><br>
+      <input type="text" id="snapchatLinkInput" placeholder="Enter Snapchat profile link" value="${userData.snapchatLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>Threads Name</label>
+      <input type="text" id="threadsInput" placeholder="Enter Threads name" value="${userData.threads || ''}">
+<br><br>
+      <input type="text" id="threadsLinkInput" placeholder="Enter Threads profile link" value="${userData.threadsLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>LinkedIn Name</label>
+      <input type="text" id="linkedinInput" placeholder="Enter LinkedIn name" value="${userData.linkedin || ''}">
+<br><br>
+      <input type="text" id="linkedinLinkInput" placeholder="Enter LinkedIn profile link" value="${userData.linkedinLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>YouTube Name</label>
+      <input type="text" id="youtubeInput" placeholder="Enter YouTube name" value="${userData.youtube || ''}">
+<br><br>
+      <input type="text" id="youtubeLinkInput" placeholder="Enter YouTube profile link" value="${userData.youtubeLink || ''}">
+    </div>
+
+    <div class="media-pair">
+      <label>Telegram Name</label>
+      <input type="text" id="telegramInput" placeholder="Enter Telegram name" value="${userData.telegram || ''}">
+<br><br>
+      <input type="text" id="telegramLinkInput" placeholder="Enter Telegram profile link" value="${userData.telegramLink || ''}">
+    </div>
+  </div>
+
+  <strong class="bio-warning">
+    Make sure your bio you entered in your media account contains "@Socihub-intl." 
+    To avoid task being flagged and possible account ban.
+  </strong>
+
+  <button class="save-media-btn buttonee" id="saveMediaBtn">Save Social Media Names</button>
+</div>
+`;
+
+openPanel(panelContentHTML, "profile");
+const saveMediaBtn = document.getElementById("saveMediaBtn");
+
+saveMediaBtn.addEventListener("click", async () => {
+  const platforms = [
+    "facebook", "whatsapp", "tiktok", "instagram", "snapchat",
+    "threads", "linkedin", "youtube", "telegram"
+  ];
+
+  let hasError = false;
+  const socialMediaData = {};
+
+  platforms.forEach((platform) => {
+    const nameInput = document.getElementById(`${platform}Input`);
+    const linkInput = document.getElementById(`${platform}LinkInput`);
+
+    // Remove previous errors
+    const prevErrorName = nameInput.nextElementSibling;
+    if (prevErrorName && prevErrorName.classList.contains("link-error")) prevErrorName.remove();
+
+    const prevErrorLink = linkInput.nextElementSibling;
+    if (prevErrorLink && prevErrorLink.classList.contains("link-error")) prevErrorLink.remove();
+
+    const name = nameInput.value.trim();
+    const link = linkInput.value.trim();
+
+    // WhatsApp: number check only on link input
+    if (platform === "whatsapp") {
+      if (!link) {
+        const errorMsg = document.createElement("p");
+        errorMsg.className = "link-error";
+        errorMsg.style.color = "#ff4c4c";
+        errorMsg.style.fontSize = "0.8rem";
+        errorMsg.textContent = "WhatsApp number is required";
+        linkInput.insertAdjacentElement("afterend", errorMsg);
+        hasError = true;
+      } else if (!/^\d+$/.test(link)) {
+        const errorMsg = document.createElement("p");
+        errorMsg.className = "link-error";
+        errorMsg.style.color = "#ff4c4c";
+        errorMsg.style.fontSize = "0.8rem";
+        errorMsg.textContent = "WhatsApp must contain only numbers";
+        linkInput.insertAdjacentElement("afterend", errorMsg);
+        hasError = true;
+      }
+    } else {
+      // Other platforms: link must start with https:// if not empty
+      if (link && !link.startsWith("https://")) {
+        const errorMsg = document.createElement("p");
+        errorMsg.className = "link-error";
+        errorMsg.style.color = "#ff4c4c";
+        errorMsg.style.fontSize = "0.8rem";
+        errorMsg.textContent = "Invalid link format. Must start with https://";
+        linkInput.insertAdjacentElement("afterend", errorMsg);
+        hasError = true;
+      }
+    }
+
+    // Only save valid inputs
+    if (!hasError || (platform === "whatsapp" && /^\d*$/.test(link)) || (platform !== "whatsapp" && link.startsWith("https://"))) {
+      socialMediaData[platform] = name;
+      socialMediaData[platform + "Link"] = link;
+    }
+  });
+
+  if (hasError) {
+    showAlertModal("Please fix the errors before saving.");
+    return;
+  }
+
+  // Save all valid data to Firestore
+  try {
+    await setDoc(doc(db, "users", auth.currentUser.uid), socialMediaData, { merge: true });
+    showAlertModal("Social media names & links saved successfully!");
+  } catch (err) {
+    showAlertModal("Failed to save: " + err.message);
+  }
+});
+// ------------------ JS for Profile Panel ------------------
+const profilePicDisplay = document.getElementById("profilePicDisplay");
+const profileFileInput = document.getElementById("profileFileInput");
+const uploadProfileBtn = document.getElementById("uploadProfileBtn");
+const saveNameBtn = document.getElementById("saveNameBtn");
+const fullNameInput = document.getElementById("fullNameInput");
+const resetPassBtn = document.getElementById("resetPassBtn");
+const panelThemeToggle = document.getElementById("panelThemeToggle");
+
+// Upload button triggers file input
+uploadProfileBtn.addEventListener("click", () => profileFileInput.click());
+
+// Handle profile picture change
+profileFileInput.addEventListener("change", async () => {
+const file = profileFileInput.files[0];
+if (!file) return;
+
+const reader = new FileReader();  
+reader.onload = async (e) => {  
+  profilePicDisplay.src = e.target.result;  
+
+  // Save image as base64 in Firestore (optional: replace with Firebase Storage later)  
+  await setDoc(doc(db, "users", user.uid), { profilePic: e.target.result }, { merge: true });  
+  showAlertModal("Profile picture updated!");  
+};  
+reader.readAsDataURL(file);
+
+});
+
+// Save full name
+saveNameBtn.addEventListener("click", async () => {
+  const newName = fullNameInput.value.trim();
+  if (!newName) return showAlertModal("Name cannot be empty!");
+
+  if (newName === (userData.nickname || "")) {
+    return showAlertModal("No changes detected.");
+  }
+
+  try {
+    await setDoc(
+      doc(db, "users", user.uid),
+      { nickname: newName },   // ✅ FIELD IS NOW "name"
+      { merge: true }
+    );
+
+    // ✅ Sync local state
+    userData.nickname = newName;
+
+    usernameDisplay.textContent = newName;
+    fullNameInput.value = newName;
+
+    showAlertModal("Name updated!");
+  } catch (err) {
+    showAlertModal("Error updating name: " + err.message);
+  }
+});
+
+resetPassBtn.addEventListener("click", async () => {
+  const user = auth.currentUser;
+
+  if (!user || !user.email) {
+    return showAlertModal("No logged-in user found.");
+  }
+
+  try {
+    await sendPasswordResetEmail(auth, user.email);
+    showAlertModal(
+      "Password reset email sent! Please check your inbox (and spam folder)."
+    );
+  } catch (err) {
+    showAlertModal("Error sending reset email: " + err.message);
+  }
+});
+
+// Theme toggle
+panelThemeToggle.addEventListener("click", () => {
+if (document.body.classList.contains("light")) {
+document.body.classList.remove("light");
+document.body.classList.add("dark");
+localStorage.setItem("theme", "dark");
+} else {
+document.body.classList.remove("dark");
+document.body.classList.add("light");
+localStorage.setItem("theme", "light");
+}
+});
+});
+
+/* ================= PANEL CORE ================= */
+
+const panel = document.getElementById("slidePanel");
+const panelContent = document.getElementById("panelContent");
+const closeBtn = document.getElementById("closePanel");
+
+let isPanelOpen = false;
+
+// Open panel
+function openPanel(content, panelName) {
+  panelContent.innerHTML = content;
+  panel.classList.add("active");
+  isPanelOpen = true;
+
+  // Push history ONLY once per open
+  if (!history.state || history.state.panel !== panelName) {
+    history.pushState({ panel: panelName }, "", "#" + panelName);
+  }
+}
+
+// Close panel (NO history.back)
+function closePanel() {
+  panel.classList.remove("active");
+  isPanelOpen = false;
+
+  // Clean URL without navigating away
+  if (history.state && history.state.panel) {
+    history.replaceState(null, "", location.pathname);
+  }
+}
+
+// Close button
+closeBtn.addEventListener("click", closePanel);
+
+// Click outside panel
+panel.addEventListener("click", (e) => {
+  if (e.target === panel) closePanel();
+});
+
+// Handle back / forward gesture
+window.addEventListener("popstate", (event) => {
+  if (event.state && event.state.panel) {
+    panel.classList.add("active");
+    isPanelOpen = true;
+  } else {
+    panel.classList.remove("active");
+    isPanelOpen = false;
+  }
+});
+
+/* ================= MENU ITEMS ================= */
+
+document.getElementById("contact").addEventListener("click", () => {
+  openPanel(`<section class="contact-section" id="contact">
+  <div class="contact-container">
+    
+    <div class="contact-text">
+      <h2>Contact Us</h2>
+      <p>
+        Have questions, feedback, or need support?  
+        Reach out to the SociHub team and we’ll get back to you as soon as possible.
+      </p>
+
+      <div class="contact-info">
+        <div>
+          <i class="fa-solid fa-envelope"></i>
+          <span>support@socihub.com</span>
+        </div>
+        <div>
+          <i class="fa-solid fa-globe"></i>
+          <span>www.socihub.com</span>
+        </div>
+      </div>
+    </div>
+
+    <form class="contact-form">
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea placeholder="Your Message" required></textarea>
+<a href="mailto:socihubintl@gmail.com">
+  <button type="button">Send Message</button>
+</a>
+    </form>
+
+  </div>
+</section>`);
+});
+
+/* ================= THEME ================= */
+
+const themeToggle = document.getElementById("theme-toggle");
+
+// Initial theme
+if (localStorage.getItem("theme") === "dark") {
+  document.body.classList.add("dark");
+} else {
+  document.body.classList.add("light");
+}
+
+// Toggle theme
+themeToggle.addEventListener("click", () => {
+  document.body.classList.toggle("dark");
+  document.body.classList.toggle("light");
+
+  localStorage.setItem(
+    "theme",
+    document.body.classList.contains("dark") ? "dark" : "light"
+  );
+});
+
+/* ================= PAGE LINKS ================= */
+
+document.getElementById("about").addEventListener("click", () => {
+  window.location.href = "rules.html";
+});
+
+document.getElementById("withdrawals").addEventListener("click", () => {
+  window.location.href = "withdraw.html";
+});
+document.getElementById("trans").addEventListener("click", () => {
+  window.location.href = "e-trans.html";
+});
+
+/* ================= OPTIONAL: AUTO OPEN PANEL FROM URL ================= */
+
+window.addEventListener("load", () => {
+  const hash = location.hash.replace("#", "");
+  if (hash) {
+    panel.classList.add("active");
+    isPanelOpen = true;
+    history.replaceState({ panel: hash }, "", "#" + hash);
+  }
+});
+</script> 
+</body>  
+</html>
+

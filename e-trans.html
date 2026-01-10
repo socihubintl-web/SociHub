@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My Withdrawals</title>
+<style>
+  :root {
+    --primary: #00ffcc;
+    --bg: #f4f6f8;
+    --dark: #111;
+  }
+  body { background: var(--bg); font-family: Arial,sans-serif; margin:0; color:var(--dark); }
+  .header { display:flex; align-items:center; padding:16px 20px; background:#fff; border-bottom:1px solid #eee;}
+  .header i { font-size:20px; cursor:pointer; }
+  .header h2 { flex:1; text-align:center; margin:0; }
+  .section { max-width:420px; margin:20px auto; padding:0 15px; }
+  h3 { margin: 15px 0 10px; color:var(--primary); }
+  .withdraw-card { background:#fff; border-radius:12px; padding:12px 16px; margin-bottom:12px; box-shadow:0 3px 10px rgba(0,0,0,0.05);}
+  .withdraw-card.pending { border-left:4px solid #00ffcc; }
+  .withdraw-card.rejected { border-left:4px solid #e63946; background:#ffe5e5; }
+  .withdraw-card.edited { border-left:4px dashed #2563eb; background:#f0f4ff; }
+  .withdraw-card.approved { border-left:4px solid #2a9d8f; background:#d4f7f1; }
+  p { margin:4px 0; font-size:14px; }
+  .hidden { display:none; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <i onclick="history.back()">&#8592;</i>
+  <h2>My Withdrawals</h2>
+</div>
+
+<div class="section">
+  <div id="pendingSection">
+    <h3>Pending Withdrawals</h3>
+    <div id="pendingContainer">Loading...</div>
+  </div>
+  <div id="rejectedSection">
+    <h3>Rejected / Edited Withdrawals</h3>
+    <div id="rejectedContainer">Loading...</div>
+  </div>
+  <div id="approvedSection">
+    <h3>Approved Withdrawals</h3>
+    <div id="approvedContainer">Loading...</div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, collection, getDocs, doc, getDoc, updateDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// Firebase config
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.appspot.com",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3"
+};
+
+// Init Firebase
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// DOM elements
+const pendingContainer = document.getElementById("pendingContainer");
+const rejectedContainer = document.getElementById("rejectedContainer");
+const approvedContainer = document.getElementById("approvedContainer");
+
+// Check if user is logged in
+onAuthStateChanged(auth, async (user) => {
+  if (!user) return location.href = "login.html";
+
+  const userRef = doc(db, "users", user.uid);
+  const snap = await getDoc(userRef);
+  if (!snap.exists()) return location.href = "login.html";
+
+  const data = snap.data();
+  if (data.role !== "earner") return location.href = "login.html";
+
+  loadWithdrawals(user.uid);
+});
+
+// Load user withdrawals
+async function loadWithdrawals(userId) {
+  pendingContainer.innerHTML = "Loading...";
+  rejectedContainer.innerHTML = "Loading...";
+  approvedContainer.innerHTML = "Loading...";
+
+  const snap = await getDocs(collection(db, "withdrawals"));
+  const userWithdrawals = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(w => w.userId === userId);
+
+  if (!userWithdrawals.length) {
+    pendingContainer.innerHTML = "<p>No withdrawals yet.</p>";
+    rejectedContainer.innerHTML = "";
+    approvedContainer.innerHTML = "";
+    return;
+  }
+
+  const pending = userWithdrawals.filter(w => w.status === "pending");
+  const rejected = userWithdrawals.filter(w => w.status === "rejected");
+  const approved = userWithdrawals.filter(w => w.status === "approved");
+  const edited = userWithdrawals.filter(w => w.status === "edited");
+
+  // Pending
+  pendingContainer.innerHTML = pending.length
+    ? pending.map(w => `
+      <div class="withdraw-card pending">
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>
+        <p><strong>Amount:</strong> ₦${w.amount}</p>
+        <p><strong>Net:</strong> ₦${w.netAmount}</p>
+        <p><strong>Status:</strong> ${w.status}</p>
+        <p><strong>Date:</strong> ${w.createdAt?.toDate?.().toLocaleString() || ""}</p>
+      </div>
+    `).join("")
+    : "<p>No pending withdrawals.</p>";
+
+  // Rejected
+  rejectedContainer.innerHTML = rejected.length
+    ? rejected.map(w => `
+      <div class="withdraw-card rejected" data-docid="${w.id}">
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>
+        <p><strong>Amount:</strong> ₦${w.amount}</p>
+        <p><strong>Account Name:</strong> ${w.accountName}</p>
+        <p><strong>Account Number:</strong> ${w.accountNumber}</p>
+        <p><strong>Reason:</strong> ${w.rejectReason || "Not specified"}</p>
+        <p><strong>Rejected At:</strong> ${w.rejectedAt?.toDate?.().toLocaleString() || ""}</p>
+      </div>
+    `).join("")
+    : "<p>No rejected withdrawals.</p>";
+
+  // Edited
+  if (edited.length) {
+    rejectedContainer.innerHTML += edited.map(w => `
+      <div class="withdraw-card edited" data-docid="${w.id}">
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>
+        <p><strong>Amount:</strong> ₦${w.amount}</p>
+        <p><strong>Account Name:</strong> ${w.accountName}</p>
+        <p><strong>Account Number:</strong> ${w.accountNumber}</p>
+        <p><strong>Edited At:</strong> ${w.editedAt?.toDate?.().toLocaleString() || ""}</p>
+      </div>
+    `).join("");
+  }
+
+  // Approved
+  approvedContainer.innerHTML = approved.length
+    ? approved.map(w => `
+      <div class="withdraw-card approved">
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>
+        <p><strong>Amount:</strong> ₦${w.amount}</p>
+        <p><strong>Net:</strong> ₦${w.netAmount}</p>
+        <p><strong>Status:</strong> ${w.status}</p>
+        <p><strong>Date:</strong> ${w.createdAt?.toDate?.().toLocaleString() || ""}</p>
+      </div>
+    `).join("")
+    : "<p>No approved withdrawals.</p>";
+
+  // Add click listener for editing rejected withdrawals
+  rejected.forEach(w => {
+    const cardEl = rejectedContainer.querySelector(`[data-docid="${w.id}"]`);
+    if (cardEl) cardEl.addEventListener("click", () => editRejectedWithdrawal(w, userId));
+  });
+}
+
+// Edit rejected withdrawal
+async function editRejectedWithdrawal(withdrawal, userId) {
+  const newAccName = prompt("Edit Account Name:", withdrawal.accountName);
+  if (!newAccName) return;
+
+  const newAccNumber = prompt("Edit Account Number:", withdrawal.accountNumber);
+  if (!newAccNumber || newAccNumber.length < 10) {
+    alert("Account number must be at least 10 digits");
+    return;
+  }
+
+  const docRef = doc(db, "withdrawals", withdrawal.id);
+  await updateDoc(docRef, {
+    accountName: newAccName,
+    accountNumber: newAccNumber,
+    status: "edited",
+    editedAt: serverTimestamp()
+  });
+
+  alert("Withdrawal updated successfully!");
+  loadWithdrawals(userId); // Reload withdrawals
+}
+</script>
+</body>
+</html>

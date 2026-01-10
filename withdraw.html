@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Withdrawal System</title>
+<script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script> 
+<style>  
+:root {  
+  --primary: #00ffcc;  
+  --dark: #111;  
+  --gray: #777;  
+  --bg: #f4f6f8;  
+}  
+  
+* { box-sizing: border-box; }  
+  
+body {  
+  margin: 0;  
+  background: var(--bg);  
+  font-family: "Inter", Arial, sans-serif;  
+  color: var(--dark);  
+}  
+  
+/* HEADER */  
+.header {  
+  display: flex;  
+  align-items: center;  
+  padding: 16px 20px;  
+  background: #fff;  
+  border-bottom: 1px solid #e5e5e5;  
+}  
+  
+.header i { font-size: 18px; cursor: pointer; }  
+.header h2 { font-size: 28px; margin: 0 auto; }  
+  
+/* CARD */  
+.wrapper { max-width: 420px; margin: 30px auto; padding: 0 13px; }  
+.card { background: #fff; border-radius: 14px; padding: 20px; box-shadow: 0 10px 25px rgba(0,0,0,.06); }  
+.section { margin-top: 18px; }  
+.label { font-size: 13px; color: var(--gray); margin-bottom: 6px; }  
+  
+/* INPUTS */  
+input, select { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid #ddd; font-size: 14px; outline: none; }  
+input:focus, select:focus { border-color: var(--primary); }  
+input[readonly] { background: #f0f0f0; }  
+  
+/* COPY BOX */  
+.copy-box { display: flex; align-items: center; gap: 10px; padding: 14px; border: 1px dashed #ddd; border-radius: 10px; font-size: 14px; cursor: pointer; transition: background .2s ease; }  
+.copy-box:hover { background: #f7f7f7; }  
+.copy-box i { color: var(--primary); }  
+  
+/* BUTTONS */  
+button { width: 100%; padding: 15px; border-radius: 12px; border: none; font-weight: 600; font-size: 15px; margin-top: 20px; cursor: pointer; }  
+.primary-btn { background: var(--primary); color: #000; }  
+.primary-btn:disabled { background: #b6f0e4; cursor: not-allowed; }  
+  
+/* PAYMENT CARD */  
+.payment-card { margin-top: 25px; border-top: 1px solid #eee; padding-top: 20px; display: none; }  
+.payment-card h3 { margin: 0 0 10px; font-size: 15px; }  
+.payment-info { background: #f9f9f9; border-radius: 10px; padding: 14px; font-size: 14px; }  
+.payment-info p { margin: 6px 0; }  
+  
+/* FEEDBACK */  
+.feedback { margin-top: 12px; font-size: 14px; }  
+.feedback.error { color: #e63946; }  
+.feedback.success { color: #2a9d8f; }  
+  
+/* MODAL */  
+.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); display: none; align-items: center; justify-content: center; z-index: 999; }  
+.modal-card { background: #fff; width: 90%; max-width: 360px; border-radius: 16px; padding: 25px; text-align: center; animation: pop .25s ease; }  
+@keyframes pop { from { transform: scale(.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }  
+.modal-icon { width: 60px; height: 60px; background: #00ffcc; color: #000; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 26px; margin: 0 auto 15px; font-weight: bold; }  
+.modal-card h2 { margin: 10px 0 6px; }  
+.modal-card p { font-size: 14px; color: #555; margin-bottom: 20px; }  
+#myDepositsContainer { margin-top:20px; }  
+.deposit-card { background:#fff; padding:15px; border-radius:12px; margin-bottom:12px; box-shadow:0 5px 15px rgba(0,0,0,.05); cursor:pointer; }  
+.deposit-card.rejected { border:1px solid #e63946; }  
+.deposit-card.pending, .deposit-card.verified { border:1px solid #00ffcc; }  
+.deposit-card p { margin:4px 0; font-size:14px; }  
+.slide-panel {  
+  position: fixed;  
+  top: 0;  
+  right: -100%;  
+  width: 100%;  
+  max-width: 420px;  
+  height: 100%;  
+  background: #f4f6f8;  
+  box-shadow: -4px 0 20px rgba(0,0,0,.1);
+  transition: right 0.3s ease;  
+  z-index: 9999;  
+  padding: 20px;  
+  overflow-y: auto;  
+}  
+  
+.slide-panel.open { right: 0; }  
+  
+.panel-header {  
+  color: #00cc88;
+  display: flex;  
+  justify-content: space-between;  
+  align-items: center;  
+  margin-bottom: 15px;  
+}  
+  #closeOverlayBtn {
+    position:absolute;
+    right:9%;
+    top:35%;
+  width:10%;
+  background:transparent;
+  color:white;
+  }
+.panel-header h2 { font-size:2rem;margin: 12px auto; }  
+.panel-header #closePanelBtn{  
+  color: #111;
+  font-size: 34px;  
+  background: none;  
+  cursor: pointer;  
+}  
+/* Overlay background */  
+.overlay {  
+  position: fixed;  
+  inset: 0;  
+  background: rgba(0,0,0,0.65);  
+  z-index: 9999;  
+  display: flex;  
+  align-items: center;  
+  justify-content: center;  
+}  
+  
+/* Hide helper */  
+.hidden {  
+  display: none;  
+}  
+  
+/* Card */  
+.overlay-card {  
+  background: #111;  
+  color: #fff;  
+  padding: 25px;  
+  border-radius: 12px;  
+  width: 85%;  
+  max-width: 320px;  
+  text-align: center;  
+  box-shadow: 0 0 20px rgba(0,255,204,0.3);  
+}  
+  
+/* Spinner */  
+.spinner {
+width: 45px;
+height: 45px;
+border-top: 4px solid #00ffcc;
+border-radius: 50%;
+margin: 0 auto 15px;
+border-bottom: 4px solid red;
+animation: spin 0.4s linear infinite;
+}  
+  
+@keyframes spin {  
+  to { transform: rotate(360deg); }  
+}  
+  
+/* Lock page scroll */  
+body.locked {  
+  overflow: hidden;  
+}
+.flextop {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  background: transparent;
+  position: relative;
+  left: 17px;
+  width: 90%;
+  padding: 8px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #0f172a;
+  box-shadow:0 1px 8px rgba(0,0,0,0.02);
+}
+/* SAFETY PANEL CONTENT */
+
+.safety-content {
+  line-height: 1.7;
+  font-size: 14px;
+  color: #111;
+}
+
+.safety-title {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.safety-text {
+  margin-bottom: 14px;
+  color: #333;
+}
+
+.safety-list {
+  padding-left: 18px;
+  margin: 18px 0;
+}
+
+.safety-list li {
+  margin-bottom: 12px;
+  color: #222;
+}
+
+.safety-list li strong {
+  color: #000;
+}
+
+.safety-try {
+  margin-top: 18px;
+  font-weight: 500;
+  color: #111;
+}
+
+.try-amount {
+  display: inline-block;
+  margin-left: 6px;
+  padding: 2px 6px;
+  color: #2563eb;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.try-amount:hover {
+  opacity: 0.85;
+}
+
+.safety-note {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #555;
+}
+/* Pending Withdrawals */
+.deposit-card.pending {
+  border: 1px solid #00ffcc;
+  background: #e0fff7;
+  color: #000;
+}
+
+/* Rejected Withdrawals */
+.deposit-card.rejected {
+  border: 1px solid #e63946;
+  background: #ffe5e5;
+  color: #111;
+}
+
+/* Successful Withdrawals */
+.deposit-card.verified {
+  border: 1px solid #2a9d8f;
+  background: #d4f7f1;
+  color: #111;
+}
+
+/* Edited Withdrawals */
+.deposit-card.edited {
+  border: 2px dashed #2563eb;
+  background: #f0f4ff;
+  color: #111;
+}
+</style>  
+</head>
+<body>
+  <div id="withdrawForm">
+
+    <!-- HEADER -->
+    <div class="header">
+      <i class="fas fa-arrow-left" onclick="history.back()"></i>
+      <h2>Withdrawal System</h2>
+    </div>
+
+    <!-- TOP ACTIONS -->
+    <div class="flextop">
+      <strong id="viewMyWithdrawalsBtn">History</strong>
+      <strong id="withdrawSafetyBtn">Real?</strong>
+    </div>
+
+    <!-- WITHDRAWAL FORM -->
+    <div class="wrapper">
+      <div class="card">
+
+        <!-- Bank Name -->
+        <div class="section">
+          <div class="label">Bank Name</div>
+          <input type="text" id="withdrawBank" placeholder="e.g. Opay, Access Bank">
+        </div>
+
+        <!-- Account Name -->
+        <div class="section">
+          <div class="label">Account Name</div>
+          <input type="text" id="withdrawAccName" placeholder="Account holder name">
+        </div>
+
+        <!-- Account Number -->
+        <div class="section">
+          <div class="label">Account Number</div>
+          <input type="number" id="withdrawAccNumber" placeholder="10-digit account number">
+        </div>
+
+        <!-- Withdrawal Amount -->
+        <div class="section">
+          <div class="label">Withdrawal Amount</div>
+          <select id="withdrawAmount">
+            <option value="">Select amount</option>
+            <option value="50" hidden>₦50</option>
+            <option value="1200">₦1,200</option>
+            <option value="2200">₦2,200</option>
+            <option value="3200">₦3,200</option>
+            <option value="4200">₦4,200</option>
+            <option value="5200">₦5,200</option>
+          </select>
+        </div>
+
+        <!-- Charge Note -->
+        <div class="section">
+          <p style="font-size:13px;color:#555;">
+            ⚠ Platform charges <strong>₦200</strong> off every withdrawal.
+          </p>
+        </div>
+
+        <!-- Generate Withdrawal ID Button -->
+        <button class="primary-btn" id="genWithdrawBtn">
+          Generate Withdrawal ID
+        </button>
+
+        <!-- GENERATED WITHDRAWAL CARD -->
+        <div class="payment-card" id="withdrawCard" style="display:none;">
+          <h3>Withdrawal Details</h3>
+          <div class="payment-info">
+            <p><strong>Withdrawal ID:</strong> <span id="withdrawId"></span></p>
+            <p><strong>Requested Amount:</strong> ₦<span id="grossAmount"></span></p>
+            <p><strong>Charges:</strong> ₦<span id="chargeAmount"></span></p>
+            <p><strong>You Receive:</strong> ₦<span id="netAmount"></span></p>
+          </div>
+          <div class="feedback" id="withdrawFeedback"></div>
+          <button class="primary-btn" id="submitWithdrawBtn">Submit Withdrawal</button>
+        </div>
+
+      </div>
+<p style="text-align: center; margin: 20px 0;">
+  <a href="mailto:socihubintl@gmail.com" style="
+      color: #111; 
+      text-decoration: none; 
+      font-size: 12px;
+  ">
+    Contact us if you encountered an error or issue
+  </a>
+</p>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-overlay" id="successModal" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-icon">✓</div>
+      <h2>Withdrawal Submitted</h2>
+      <p>Your withdrawal is being processed.<br>You can track the status below.</p>
+      <button id="viewDepositBtn" class="primary-btn">View Withdrawal</button>
+    </div>
+  </div>
+
+  <!-- Withdrawals History Panel -->
+  <div id="withdrawPanel" class="slide-panel">
+    <div class="panel-header">
+      <h2>My Withdrawals</h2>
+      <button id="closeWithdrawPanel">&times;</button>
+    </div>
+    <div id="withdrawPanelContent"></div>
+  </div>
+
+  <!-- Safety Info Panel -->
+  <div id="safetyPanel" class="slide-panel">
+    <div class="panel-header">
+      <h2>Is withdrawal real?</h2>
+      <button id="closePanel-Btn" style="display:none;">&times;</button>
+    </div>
+    <div id="SafetyPanelContent"></div>
+  </div>
+
+  <!-- Submit Overlay -->
+  <div id="submitOverlay" class="overlay hidden">
+    <div class="overlay-card">
+      <button id="closeOverlayBtn" class="close-btn" disabled>&times;</button>
+      <div class="spinner" id="overlaySpinner"></div>
+      <p id="overlayText">
+        Submitting withdrawal...<br>
+        <small>This might take a while</small>
+      </p>
+    </div>
+  </div>
+
+</body>
+<script type="module">    
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";    
+import { getAuth, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";    
+import {    
+  getFirestore,    
+  collection,    
+  addDoc,    
+  serverTimestamp,    
+  doc,    
+  getDoc,    
+  getDocs,    
+  query,    
+  where,    
+  updateDoc    
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";    
+    
+/* =========================    
+   FIREBASE SETUP    
+========================= */    
+const firebaseConfig = {    
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",    
+  authDomain: "socihub-a2731.firebaseapp.com",    
+  projectId: "socihub-a2731",    
+  storageBucket: "socihub-a2731.appspot.com",    
+  messagingSenderId: "815252223754",    
+  appId: "1:815252223754:web:99a26383a59c2557412cf3"    
+};    
+    
+const app = initializeApp(firebaseConfig);    
+const auth = getAuth(app);    
+const db = getFirestore(app);    
+    
+/* =========================    
+   DOM ELEMENTS    
+========================= */    
+const genWithdrawBtn = document.getElementById("genWithdrawBtn");    
+const submitWithdrawBtn = document.getElementById("submitWithdrawBtn");    
+    
+const bankName = document.getElementById("withdrawBank");    
+const accName = document.getElementById("withdrawAccName");    
+const accNumber = document.getElementById("withdrawAccNumber");    
+const amountSelect = document.getElementById("withdrawAmount");    
+    
+const withdrawCard = document.getElementById("withdrawCard");    
+const withdrawIdEl = document.getElementById("withdrawId");    
+const grossAmountEl = document.getElementById("grossAmount");    
+const chargeAmountEl = document.getElementById("chargeAmount");    
+const netAmountEl = document.getElementById("netAmount");    
+const withdrawFeedback = document.getElementById("withdrawFeedback");    
+    
+const submitOverlay = document.getElementById("submitOverlay");    
+const closeOverlayBtn = document.getElementById("closeOverlayBtn");    
+const overlayText = document.getElementById("overlayText");    
+  // Already defined:
+// const submitOverlay = document.getElementById("submitOverlay");
+// const closeOverlayBtn = document.getElementById("closeOverlayBtn");
+// const overlayText = document.getElementById("overlayText");
+
+// Enable close button immediately so user can click
+closeOverlayBtn.disabled = false;
+
+closeOverlayBtn.addEventListener("click", () => {
+  // Hide overlay
+  submitOverlay.classList.add("hidden");
+
+  // Reset spinner or text if needed
+  overlayText.innerHTML = 'Submitting withdrawal...<br><small>This might take a while</small>';
+
+  // Re-enable submit button if it was disabled
+  const submitWithdrawBtn = document.getElementById("submitWithdrawBtn");
+  if (submitWithdrawBtn) submitWithdrawBtn.disabled = false;
+});
+
+// Optional: clicking outside overlay-card closes it
+submitOverlay.addEventListener("click", (e) => {
+  if (e.target === submitOverlay) {
+    submitOverlay.classList.add("hidden");
+  }
+}); 
+   
+    
+const successModal = document.getElementById("successModal");    
+const viewDepositBtn = document.getElementById("viewDepositBtn");    
+    
+const viewMyWithdrawalsBtn = document.getElementById("viewMyWithdrawalsBtn");    
+const withdrawPanel = document.getElementById("withdrawPanel");    
+const withdrawPanelContent = document.getElementById("withdrawPanelContent");    
+const closeWithdrawPanel = document.getElementById("closeWithdrawPanel");    
+    
+const safetyBtn = document.getElementById("withdrawSafetyBtn");    
+const safetyPanel = document.getElementById("safetyPanel");    
+const SafetyPanelContent = document.getElementById("SafetyPanelContent");    
+const closeSafetyPanel = document.getElementById("closePanel-Btn");    
+    
+/* =========================    
+   STATE    
+========================= */    
+let currentUserId = "";    
+let withdrawalId = "";    
+const FLAT_FEE = 200;  
+const TEST_AMOUNT = 50;  
+const MIN_WITHDRAW = 1000;  
+/* =========================    
+   AUTH CHECK    
+========================= */    
+onAuthStateChanged(auth, async (user) => {
+  if (!user) {
+    location.href = "login.html";
+    return;
+  }
+
+  // Set current user ID
+  currentUserId = user.uid;
+
+  const testBtn = document.getElementById("test50Btn");
+  if (testBtn) {
+    testBtn.disabled = false;
+    testBtn.textContent = "Use ₦50 Test Withdrawal";
+  }
+
+  // Lock ₦50 button if already used (from previous logic)
+  lock50IfUsed();
+});
+    
+/* =========================    
+   FETCH PLATFORM OWNER DOC    
+========================= */    
+async function getOwnerDoc() {    
+  const q = query(collection(db, "users"), where("role", "==", "owner"));    
+  const snap = await getDocs(q);    
+  if (!snap.empty) return snap.docs[0].ref;    
+  else throw new Error("Owner not found!");    
+}    
+    
+/* =========================    
+   FETCH USER BALANCE    
+========================= */    
+async function getUserBalance(userId) {    
+  const userRef = doc(db, "users", userId);    
+  const snap = await getDoc(userRef);    
+  if (!snap.exists()) throw new Error("User not found!");    
+    
+  const data = snap.data();    
+    
+  if (data.role !== "earner") throw new Error("Only earners can withdraw!");    
+    
+  // ✅ Return balance, ref, and fullname    
+  return {    
+    balance: data.balance || 0,    
+    ref: userRef,    
+    fullname: data.fullname || "No Name"    
+  };    
+}    
+ 
+function calculateWithdrawal(amount) {
+  // Special case: ₦50 test withdrawal
+  const isTest = amount === TEST_AMOUNT;
+
+  if (!isTest && amount < MIN_WITHDRAW) {
+    throw new Error("Minimum withdrawal is ₦1,000");
+  }
+
+  const charge = isTest ? 0 : FLAT_FEE;
+  const netAmount = amount - charge;
+
+  if (netAmount <= 0) {
+    throw new Error("Withdrawal amount too low");
+  }
+
+  // Total deduction is always the full amount (test or normal)
+  return {
+    amount,           // what is deducted from wallet
+    charge,           // platform fee
+    netAmount,        // what user receives
+    totalDeduction: amount // what to subtract from balance
+  };
+}
+/* =========================    
+   GENERATE WITHDRAWAL ID    
+========================= */    
+genWithdrawBtn.addEventListener("click", () => {
+  if (withdrawalId) return;
+
+  if (!bankName.value.trim() || !accName.value.trim() || accNumber.value.trim().length < 10) {
+    alert("Please fill in valid bank details");
+    return;
+  }
+
+  if (!amountSelect.value) {
+    alert("Select withdrawal amount");
+    return;
+  }
+
+  try {
+    const amount = Number(amountSelect.value);
+    const { charge, netAmount } = calculateWithdrawal(amount);
+
+    withdrawalId = "WD-" + Date.now();
+
+    withdrawIdEl.textContent = withdrawalId;
+    grossAmountEl.textContent = amount;
+    chargeAmountEl.textContent = charge;
+    netAmountEl.textContent = netAmount;
+
+    withdrawCard.style.display = "block";
+    genWithdrawBtn.disabled = true;
+    genWithdrawBtn.textContent = "Withdrawal ID Generated";
+  } catch (err) {
+    alert(err.message);
+  }
+});
+    
+/* Reset if amount changes */    
+amountSelect.addEventListener("change", () => {    
+  withdrawalId = "";    
+  withdrawCard.style.display = "none";    
+  genWithdrawBtn.disabled = false;    
+  genWithdrawBtn.textContent = "Generate Withdrawal ID";    
+});    
+    
+/* =========================    
+   SUBMIT WITHDRAWAL    
+========================= */    
+submitWithdrawBtn.addEventListener("click", async () => {
+  if (!withdrawalId) return;
+
+  submitWithdrawBtn.disabled = true;
+  submitOverlay.classList.remove("hidden");
+  overlayText.textContent = "Processing withdrawal...";
+
+  try {
+    const amount = Number(amountSelect.value);
+    const { charge, totalDeduction, netAmount } = calculateWithdrawal(amount);
+
+    // 1️⃣ Get user balance
+    const { balance, ref: userRef } = await getUserBalance(currentUserId);
+
+    // 2️⃣ Check balance for normal or ₦50 test
+    if (balance < totalDeduction) {
+      throw new Error("Insufficient balance");
+    }
+
+    // 3️⃣ Save withdrawal
+    await addDoc(collection(db, "withdrawals"), {
+      userId: currentUserId,
+      withdrawalId,
+      bankName: bankName.value.trim(),
+      accountName: accName.value.trim(),
+      accountNumber: accNumber.value.trim(),
+      amount: netAmount,
+      charge,
+      netAmount,
+      totalDeduction,
+      status: "pending",
+      createdAt: serverTimestamp()
+    });
+
+    // 4️⃣ Deduct user balance (works for normal & ₦50 test)
+    await updateDoc(userRef, {
+      balance: balance - totalDeduction
+    });
+
+    // 5️⃣ Credit owner if charge exists
+    if (charge > 0) {
+      const ownerRef = await getOwnerDoc();
+      const ownerSnap = await getDoc(ownerRef);
+      const prevBal = ownerSnap.data().withBal || 0;
+
+      await updateDoc(ownerRef, { withBal: prevBal + charge });
+    }
+
+    // 6️⃣ Success UI
+    submitOverlay.classList.add("hidden");
+    successModal.style.display = "flex";
+
+    // Reset
+    withdrawCard.style.display = "none";
+    withdrawalId = "";
+    genWithdrawBtn.disabled = false;
+    genWithdrawBtn.textContent = "Generate Withdrawal ID";
+    amountSelect.value = "";
+    amountSelect.disabled = false; // Unlock select after submission
+
+  } catch (err) {
+    overlayText.textContent = err.message;
+  } finally {
+    submitWithdrawBtn.disabled = false;
+  }
+});
+    
+/* CLOSE OVERLAY */    
+closeOverlayBtn.addEventListener("click", () => submitOverlay.classList.add("hidden"));    
+    
+/* VIEW SUCCESS MODAL -> HISTORY */    
+viewDepositBtn.addEventListener("click", () => {    
+  successModal.style.display = "none";    
+  openWithdrawHistory();    
+});    
+    
+    
+viewMyWithdrawalsBtn.addEventListener("click", () => {    
+  openWithdrawHistory(); // load history    
+  openPanel("withdrawPanel", withdrawPanel);    
+});    
+    
+/* =========================  
+   SAFETY PANEL & ₦50 TEST  
+========================= */  
+safetyBtn.addEventListener("click", () => {  
+  SafetyPanelContent.innerHTML = `  
+  <div class="safety-content">  
+    <h3 class="safety-title">Is Withdrawal Real & Safe?</h3>  
+  
+    <p>  
+      Yes. SociHub withdrawals are real and carefully handled to protect earners and maintain platform integrity.  
+      Every withdrawal request goes through a strict manual review process before payment is made.  
+    </p>  
+  
+    <ul class="safety-list">  
+      <li><strong>Manual verification:</strong> Each request is checked by the team before approval.</li>  
+      <li><strong>Accurate account details:</strong> Prevents wrong or failed transfers.</li>  
+      <li><strong>Clear status flow:</strong> Pending → Approved → Paid or Rejected.</li>  
+      <li><strong>Platform charge:</strong> ₦200 off fee to supports system maintenance and payouts.</li>  
+    </ul>  
+  
+    <p>  
+      To build trust for new earners, SociHub provides a one-time ₦50 test withdrawal.  
+      This allows users to confirm that withdrawals work correctly before requesting higher amounts.  
+    </p>  
+  
+    <button  
+      id="test50Btn"  
+      type="button"  
+      class="test-withdraw-btn">  
+      Use ₦50 Test Withdrawal  
+    </button>  
+  </div>  
+  `;  
+  
+  openPanel("safetyPanel", safetyPanel);  
+  
+  const testBtn = document.getElementById("test50Btn");  
+  
+  // Check if user already used ₦50 test  
+  const used = localStorage.getItem(`used50Withdraw_${currentUserId}`);  
+  if (used === "true") {  
+    testBtn.disabled = true;  
+    testBtn.textContent = "₦50 Test Used";  
+  }  
+  
+  // Click handler  
+  testBtn.addEventListener("click", () => {  
+    // Prevent multiple clicks  
+    const alreadyUsed = localStorage.getItem(`used50Withdraw_${currentUserId}`);  
+    if (alreadyUsed === "true") return;  
+  
+    // Fill amount input  
+    amountSelect.value = "50";  
+  
+    // Disable the button permanently, but not the select  
+    testBtn.disabled = true;  
+    testBtn.textContent = "₦50 Test Used";  
+  
+    // Store state  
+    localStorage.setItem(`used50Withdraw_${currentUserId}`, "true");  
+  
+    // Close safety panel  
+    safetyPanel.classList.remove("open");  
+  });  
+});  
+  
+// Lock ₦50 button if already used on page load  
+function lock50IfUsed() {  
+  const used = localStorage.getItem(`used50Withdraw_${currentUserId}`);
+if (used === "true") {
+  testBtn.disabled = true;
+  testBtn.textContent = "₦50 Test Used";
+}
+}  
+    
+/* =========================    
+   HISTORY PANEL    
+========================= */    
+async function openWithdrawHistory() {    
+  withdrawPanelContent.innerHTML = "Loading...";    
+  const snap = await getDocs(collection(db, "withdrawals"));    
+      
+  // Filter by user    
+  const userWithdrawals = snap.docs    
+    .map(d => ({ id: d.id, ...d.data() }))    
+    .filter(d => d.userId === currentUserId);    
+    
+  if (!userWithdrawals.length) {    
+    withdrawPanelContent.innerHTML = "<p>No withdrawals yet.</p>";    
+    return;    
+  }    
+    
+  // Separate statuses    
+  const pending = userWithdrawals.filter(w => w.status === "pending");    
+  const rejected = userWithdrawals.filter(w => w.status === "rejected");    
+  const success = userWithdrawals.filter(w => w.status === "approved");    
+    
+  let html = "";    
+    
+  // Pending    
+  if (pending.length) {    
+    html += `<h4>Pending Withdrawals</h4>`;    
+    html += pending.map(w => `    
+      <div class="deposit-card pending">    
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>    
+        <p><strong>Amount:</strong> ₦${w.amount}</p>    
+        <p><strong>Net:</strong> ₦${w.netAmount}</p>    
+        <p><strong>Status:</strong> ${w.status}</p>    
+        <p><strong>Date:</strong> ${w.createdAt?.toDate?.().toLocaleString() || ""}</p>    
+      </div>    
+    `).join("");    
+  }    
+    
+  // Rejected    
+  if (rejected.length) {    
+    html += `<h4>Rejected Withdrawals</h4>`;    
+    html += rejected.map(w => `    
+      <div class="deposit-card rejected" data-docid="${w.id}">    
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>    
+        <p><strong>Amount:</strong> ₦${w.amount}</p>    
+        <p><strong>Account Name:</strong> ${w.accountName}</p>    
+        <p><strong>Account Number:</strong> ${w.accountNumber}</p>    
+        <p><strong>Reason:</strong> ${w.rejectReason || "Not specified"}</p>    
+        <p><strong>Rejected At:</strong> ${w.rejectedAt?.toDate?.().toLocaleString() || ""}</p>    
+      </div>    
+    `).join("");    
+  }    
+    
+  // Success    
+  if (success.length) {    
+    html += `<h4>Successful Withdrawals</h4>`;    
+    html += success.map(w => `    
+      <div class="deposit-card verified">    
+        <p><strong>ID:</strong> ${w.withdrawalId}</p>    
+        <p><strong>Amount:</strong> ₦${w.amount}</p>    
+        <p><strong>Net:</strong> ₦${w.netAmount}</p>    
+        <p><strong>Status:</strong> ${w.status}</p>    
+        <p><strong>Date:</strong> ${w.createdAt?.toDate?.().toLocaleString() || ""}</p>    
+      </div>    
+    `).join("");    
+  }    
+    
+  withdrawPanelContent.innerHTML = html;    
+  withdrawPanel.classList.add("open");    
+    
+  // Add click listener for editing rejected withdrawals    
+  rejected.forEach(w => {    
+    const cardEl = withdrawPanelContent.querySelector(`[data-docid="${w.id}"]`);    
+    cardEl.addEventListener("click", () => editRejectedWithdrawal(w));    
+  });    
+}    
+    
+async function editRejectedWithdrawal(withdrawal) {    
+  const newAccName = prompt("Edit Account Name:", withdrawal.accountName);    
+  if (!newAccName) return;    
+    
+  const newAccNumber = prompt("Edit Account Number:", withdrawal.accountNumber);    
+  if (!newAccNumber || newAccNumber.length < 10) {    
+    alert("Account number must be at least 10 digits");    
+    return;    
+  }    
+    
+  // Update Firestore    
+  const docRef = doc(db, "withdrawals", withdrawal.id);    
+  await updateDoc(docRef, {    
+    accountName: newAccName,    
+    accountNumber: newAccNumber,    
+    status: "edited",    
+    editedAt: serverTimestamp()    
+  });    
+    
+  alert("Withdrawal updated successfully!");    
+  openWithdrawHistory(); // Reload history    
+}    
+function openPanel(panelName, panelEl) {    
+  panelEl.classList.add("open");          // Show the panel    
+  history.pushState({ panelOpen: panelName }, "", ""); // Add to history    
+}    
+closeWithdrawPanel.addEventListener("click", () => history.back());    
+closeSafetyPanel.addEventListener("click", () => history.back());    
+    
+window.addEventListener("popstate", e => {    
+  const state = e.state;    
+    
+  if (!state || state.panelOpen !== "withdrawPanel") withdrawPanel.classList.remove("open");    
+  if (!state || state.panelOpen !== "safetyPanel") safetyPanel.classList.remove("open");    
+});    
+    
+const test50Btn = document.getElementById("test50Btn");    
+    
+function use50TestWithdrawal() {    
+  // Fill amount    
+  amountSelect.value = "50";    
+    
+  // Lock select    
+  amountSelect.disabled = true;    
+    
+  // Lock button    
+  test50Btn.disabled = true;    
+  test50Btn.textContent = "₦50 Test Used";    
+    
+  // Store once    
+  localStorage.setItem(`used50Withdraw_${currentUserId}`, "true");    
+}    
+  
+    
+    
+</script> 
+</html>

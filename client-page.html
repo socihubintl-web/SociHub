@@ -1,0 +1,3208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Client Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: Poppins, sans-serif;
+}
+
+/* Body & content spacing */
+body {
+  background: #f4f4f4;
+  padding-top: 60px; /* space for fixed header */
+  padding: 15px;
+}
+/* Modal background */
+.modalip-bg {
+  display: none; /* hidden initially */
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.7); /* semi-transparent dark overlay */
+  justify-content: center;
+  align-items: center;
+  z-index: 99999;
+}
+
+/* Show modal when active */
+.modalip-bg.active {
+  display: flex;
+}
+
+/* Modal container */
+.modalip {
+  background: #f1f1f1; 
+  padding: 2rem;
+  border-radius: 12px;
+  width: 320px;
+  max-width: 90%;
+  text-align: center;
+  color: #111;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+  font-family: Poppins, sans-serif;
+  animation: scaleUp 0.3s ease forwards;
+}
+
+/* Modal heading */
+.modalip h2 {
+  margin-bottom: 1rem;
+  font-size: 1.4rem;
+  color: #222;
+}
+
+/* Stats list */
+.stats {
+  text-align: left;
+  font-size: 0.9rem;
+  margin-bottom: 1rem;
+}
+
+.stats p {
+  margin: 6px 0;
+}
+
+.stats span {
+  font-weight: 600;
+  color: #555;
+}
+
+/* Progress bar container */
+.progress-bar-bg {
+  width: 100%;
+  height: 12px;
+  background: black;
+  border-radius: 6px;
+  overflow: hidden;
+  margin-top: 10px;
+}
+
+/* Progress bar fill */
+.progress-bar {
+  height: 100%;
+  width: 0%;
+  background: #00ffcc;
+  transition: width 0.3s ease;
+  border-radius: 6px;
+}
+
+/* Animation for modal appearance */
+@keyframes scaleUp {
+  0% { transform: scale(0.9); opacity: 0; }
+  100% { transform: scale(1); opacity: 1; }
+}
+/* Fixed Header */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  border-radius: 5px;
+  width: 100%;
+  height: 70px;
+  background-color: #00cc88;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 20px;
+  z-index: 1000;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+/* Header title & menu */
+.header h1 {
+  font-size: 1.8rem;
+  font-weight: 600;
+}
+
+.header .menu-icon {
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+.welcome {  font-size: 14px;  
+font-weight: 200;  
+font-weight:  400;
+margin-bottom: 15px;  
+}  .balance-card {
+background: #fff;
+padding: 15px;
+border-radius: 12px;
+box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+margin-bottom: 50px;
+}
+.main {
+  padding-top: 100px; 
+  max-width: 900px;
+  margin: auto;
+}
+.balance-header {
+font-size: 16px;
+margin-bottom:20px;
+font-weight: 550px;
+}
+
+.balance-amount {
+font-size: 24px;
+font-weight: 600;
+margin: 29px 0;
+}
+
+.balance-buttons {
+display: flex;
+justify-content: space-between;
+gap: 25px;
+margin-top: 10px;
+}
+
+.balance-buttons button {
+flex: 1;
+background: #00cc88;
+color: #fff;
+font-size: 13px;
+border: none;
+padding: 9px 0;
+border-radius: 8px;
+cursor: pointer;
+font-weight: 600;
+letter-spacing: .3px;
+}
+.header-menu {
+  position: absolute;
+  top: 60px; /* directly under header */
+  left: 0;
+  width: 100%;
+
+  background: #00cc88;
+  backdrop-filter: blur(8px);
+
+  display: flex;
+  flex-direction: column;
+
+  max-height: 0;
+  overflow: hidden;
+
+  transition: max-height 0.35s ease;
+  box-shadow: 0 6px 12px rgba(0,0,0,0.12);
+  z-index: 999;
+}
+
+/* When open */
+.header.open .header-menu {
+  max-height: 260px; /* enough to show items */
+}
+
+/* Menu items */
+.header-menu a {
+  padding: 14px 20px;
+  text-decoration: none;
+  color: #0f172a;
+  font-size: 15px;
+  border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+
+.header-menu a:hover {
+  background: rgba(0, 204, 136, 0.1);
+}
+
+.header-menu .logout {
+  color: #d94848;
+  font-weight: 600;
+}
+.page { 
+  position: fixed; 
+  inset: 0; 
+  background: white; 
+  z-index: 1000; 
+  padding: 15px;
+  display: none; 
+  overflow-y: auto;
+  }
+.page.active { 
+  display: block;
+  }
+.page-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 40px; 
+  
+}
+.page-header button { border: none; background: #00cc88; color: white; padding: 6px 12px; border-radius: 8px; font-size: 18px; }
+.page-header h2 { margin: 0; color: #00cc88; }
+.social-column { display: flex; flex-direction: column; color: #010; font-size: 13px; gap: 10px; }
+.social-item { background: #f2f2f2; padding: 14px; border-radius: 10px; cursor: pointer; font-size: 15px; }
+form { padding: 7px;display: flex; flex-direction: column; gap: 22px; }
+input, textarea { padding: 10px; border-radius: 8px; border: 1px solid #ccc; font-size: 14px; }
+button.primary { background: #00cc88; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 16px; }
+.custom-select {
+color: black;
+position: relative;
+width: 100%;
+border: 1px solid lightgray;
+border-radius: 6px;
+cursor: pointer;
+user-select: none;
+}
+
+.custom-select .selected {
+padding: 10px;
+color: gray;
+}
+
+.custom-select .options {
+position: absolute;
+top: 100%;
+left: 0;
+right: 0;
+width: 20%;
+overflow-x: scroll;
+max-height: 120px;
+background-color: #fff;
+border: 1px solid lightgray;
+border-radius: 6px;
+margin-top: 2px;
+display: none;
+flex-direction: column;
+z-index: 10;
+}
+
+.custom-select .option {
+padding: 10px;
+color: gray;
+transition: background 0.2s;
+}
+
+.custom-select .option:hover {
+background-color: #0f172a;
+}
+#autoFillBtn {
+    width: 30%;
+  font-size: 12px;
+  padding: 7px;
+  color: #fff;
+  background: #1b1b1b;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.projectContainer {
+background: #fff;
+border-radius: 12px;
+padding: 7px;
+box-shadow: inset 0 0 13px  2px rgba(0,0,0,0.3);
+display: flex;
+gap: 10px;
+max-height:410px;
+overflow-y:scroll;
+display: flex;
+flex-direction: column;
+gap: 15px;
+margin-top: 30px;
+margin-bottom:60px;
+}
+.third-page {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #fff;
+z-index: 11000;
+display: none;
+transform: scale(0.95);
+opacity: 0;
+transition: 0.3s ease;
+padding: 20px;
+overflow-y: auto;
+box-sizing: border-box;
+}
+.third-page.active {
+display: block;
+transform: scale(1);
+opacity: 1;
+}
+.third-page-header {
+display: flex;
+align-items: center;
+gap: 15px;
+margin-bottom: 20px;
+}
+.close-third-page {
+background: #00cc88;
+color: white;
+border: none;
+padding: 6px 12px;
+border-radius: 8px;
+cursor: pointer;
+font-size: 1.2rem;
+}
+.third-page-body {
+  padding: 18px 16px 24px;
+  max-width: 600px;
+  margin: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Read-only fields */
+.project-field {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 14px;
+  color: #333;
+}
+
+.project-field strong {
+  font-weight: 500;
+  color: #555;
+  min-width: 110px;
+}
+
+/* Editable blocks */
+.project-field input,
+.project-field textarea {
+  width: 100%;
+  margin-top: -20px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  background: #fafafa;
+  font-size: 14px;
+  transition: border 0.2s ease, background 0.2s ease;
+  outline: #00cc88;
+}
+input {
+  outline: none;  
+}
+
+/* Stack editable fields */
+.project-field:has(input),
+.project-field:has(textarea) {
+  flex-direction: column;
+  align-items: flex-start;
+  outline: none;
+}
+textarea {
+  outline: red;
+}
+/* Focus */
+input:focus,
+textarea:focus {
+  border-color: #00cc88;
+  background: #fff;
+  outline: none;
+}
+
+/* Button */
+#confirmVReportEdit {
+  margin-top: 10px;
+  margin: 0 auto;
+  align-self: flex-start;
+  padding: 10px 28px;
+  border-radius: 10px;
+  border: none;
+  background: #00cc88;
+  color: #003333;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#confirmVReportEdit:hover {
+  opacity: 0.9;
+}
+.project-card {
+margin-bottom: 20px;
+position: relative;
+background: #f1f1f5;
+padding: 15px;
+border: 1px solid white;
+border-radius: 14px;
+box-shadow: 0 4px 7px rgba(0,0,0,0.06);
+}
+
+/* STATUS BADGE */
+.project-status {
+position: absolute;
+top: 12px;
+right: 12px;
+padding: 4px 10px;
+font-size: 11px;
+font-weight: 600;
+border-radius: 20px;
+text-transform: capitalize;
+color: #fff;
+}
+.complete-task-btn {
+  width: 100%;
+  font-size: 15px;
+  padding: 14px;
+  font-weight: bold;
+  background: #00cc88;
+  color: #000;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+}
+.status-in-progress {
+  background: rgba(0, 168, 118, 0.3); /* green-ish transparent */
+  color: white;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(0, 168, 118, 0.5);
+  border-radius: 8px;
+}
+
+.status-completed {
+  background: rgba(59, 91, 219, 0.3); /* blue-ish transparent */
+  color: white;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(59, 91, 219, 0.5);
+  border-radius: 8px;
+}
+
+.status-v-report {
+  background: rgba(217, 72, 72, 0.3); /* red-ish transparent */
+  color: #d94848;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(217, 72, 72, 0.5);
+  border-radius: 8px;
+}
+
+/* CODE */
+.project-code {
+font-size: 12px;
+font-weight: 600;
+color: #666;
+margin-bottom: 6px;
+}
+
+/* TITLE */
+.project-title {
+ margin-bottom: 40px;
+font-size: 16px;
+font-weight: 700;
+color: #00cc88;
+margin-bottom: 6px;
+}
+
+/* DESCRIPTION */
+.project-desc {
+  margin-bottom: 40px;
+font-size: 14px;
+color: #444;
+margin: 25px 0;
+line-height: 1.4;
+margin-bottom: 10px;
+word-break: break-word;
+}
+
+
+.project-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 25px;
+  position: relative;
+  width: 100%;
+  padding: 8px 12px;
+  margin: 15px 0;
+  border-radius: 8px;
+  font-size: 13px;
+  color: #0f172a;
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255,255,255,0.1);
+  
+}
+
+
+.project-meta span {
+font-weight: 600;
+}
+
+.project-meta span:first-child {
+color: #065a46; /* reward */
+}
+
+.project-meta span:last-child {
+color: #0a172a; /* engagers */
+}
+
+/* LINK */
+.project-link {
+font-size: 13px;
+color: #2563eb;
+margin-bottom: 20px;
+word-break: break-all;
+}
+
+/* TIME */
+.project-time {
+font-size: 10px;
+color: #888;
+margin-top: 10px;
+left: 15px;
+}
+.project-completed-time {
+font-size: 6px;
+color: #16a34a;
+position: absolute;
+bottom: 18px;
+right: 15px;
+font-weight: 600;
+}
+.task-card {
+  display: flex;
+  flex-direction: column;
+position: relative;
+gap: 15px;
+border: 1px solid white;
+background: rgba(135, 206, 235, 0.2);
+padding: 14px;
+border-radius: 14px;
+box-shadow: 0 4px 10px rgba(0,0,0,0.06);
+margin-bottom: 15px;
+}
+
+.task-flag {
+  display: inline-block;
+  margin-right: 10px;
+  cursor: pointer;
+  font-size: 18px;
+}
+
+
+.task-status {
+position: absolute;
+top: 10px;
+right: 10px;
+font-size: 11px;
+padding: 3px 8px;
+border-radius: 12px;
+color: #fff;
+}
+
+.task-status.completed {  background: rgba(59, 91, 219, 0.3); /* blue-ish transparent */
+  color: white;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(59, 91, 219, 0.5);
+  border-radius: 8px; }
+.task-status.flagged { background: black; }
+
+.task-title {
+  color:#00cc88;
+  margin: 8px 0;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.task-meta {
+  font-size: 14px;
+  color: #555;
+  padding: 8px;
+}
+
+.task-meta strong {
+  font-weight: normal;
+  margin-right: 4px; /* optional small gap between label and value */
+  display: inline;
+}
+
+/* spacing between each label-value pair */
+.task-meta div {
+  margin: 10px 0; /* vertical gap between lines */
+}
+
+.task-link {
+  display: inline-block;
+  margin-top: 6px;
+  text-decoration: none;
+  color:  #2563eb;
+}
+
+.task-link:hover {
+  text-decoration: underline;
+}
+
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.5);
+  display: none; /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 20000;
+  animation: fadeIn 0.3s ease;
+}
+
+.modal.active {
+  display: flex;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 20px 25px;
+  border-radius: 12px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+  max-width: 400px;
+  width: 90%;
+  text-align: center;
+  font-family: Poppins, sans-serif;
+}
+
+.modal-content h3 {
+  color: #ef4444; /* red alert color */
+  margin-bottom: 12px;
+}
+
+.modal-content p {
+  font-size: 14px;
+  margin-bottom: 15px;
+  color: #333;
+}
+
+.modal-content a {
+  color: #2563eb;
+  text-decoration: underline;
+}
+
+.modal-buttons {
+  display: flex;
+  justify-content: space-around;
+  gap: 15px;
+}
+
+.flag-btn {
+  background: #ef4444;
+  color: #fff;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.cancel-btn {
+  background: #ccc;
+  color: #000;
+  border: none;
+  padding: 10px 18px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+/* Fade in animation */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.modal-overlay {
+  position: fixed;
+  top:0; left:0; right:0; bottom:0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+
+
+.modal-message {
+  color: #2b2b2b;
+  font-weight: bold;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+body.dark .modal-message {
+  color: white;
+  font-weight: bold;
+  margin: 20px 0;
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.modal-buttons button {
+  padding: 8px 18px;
+  font-size: 14px;
+  border:none;
+  background:#00cc88;
+  border-radius: 6px;
+  cursor:pointer;
+}
+/* Page */
+
+
+#closeVReportPage {
+  border: none;
+  background: none;
+  font-size: 22px;
+  cursor: pointer;
+  color: #666;
+}
+.loaderPix {
+  margin: 20px auto;
+  padding: 14px;
+}
+#loadingOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(200, 200, 214, 0.8); /* light gray semi-transparent */
+  display: none; /* hidden by default */
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* on top of everything */
+  overflow: hidden;
+}
+
+#loadingOverlay .overlay-content {
+  text-align: center;
+  font-weight: bold;
+  color: #00cc88;
+  margin: 10px;
+  font-family: Poppins, sans-serif;
+}
+
+#loadingOverlay .spinner {
+  margin: 0 auto 15px auto;
+  width: 40px;
+  height: 40px;
+  border: 4px solid #ccc;
+  border-top: 4px solid #00cc88; /* spinner color */
+  border-radius: 50%;
+  animation: spin 0.3s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.select-admin-btn {
+  width: 30%;
+  font-size: 12px;
+  padding: 7px;
+  background: #fff;
+  color: #000;
+  border: 1px solid black;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.selected-admin-preview {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #00cc88;
+}
+
+.admin-list {
+  padding: 12px;
+}
+
+.admin-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 14px;
+  margin-bottom: 22px;
+  cursor: pointer;
+  border: 1px solid #00cc88;
+}
+
+.admin-card:hover {
+  border-color: #00cc88;
+}
+
+.admin-name {
+  font-weight: 600;
+  font-size: 16px;
+}
+
+.admin-bio {
+  font-size: 13px;
+  color: #aaa;
+  margin-top: 4px;
+}
+.form-error {
+  color: red;
+  font-size: 13px;
+}
+
+.logoutbtn {
+    padding: 14px 20px;
+  text-decoration: none;
+  color: #0f172a;
+  font-size: 15px;
+    border-bottom: 1px solid rgba(0,0,0,0.1);
+}
+.slide-panel {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: 80%;
+  max-width: 400px;
+  height: 100%;
+  background: #0f172a;
+  color: #fff;
+  box-shadow: -3px 0 15px rgba(0,0,0,0.5);
+  transition: right 0.4s ease;
+  z-index: 9999;
+  padding: 20px;
+  overflow-y: auto;
+}
+.slide-panel.active { right: 0; }
+.close-btn {
+  font-size: 24px;
+  cursor: pointer;
+  display: block;
+  text-align: right;
+}
+.contact-section {
+  padding: 10px;
+  background: ;
+  color: #e5e7eb;
+}
+
+.contact-container {
+  max-width: 1100px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 40px;
+  align-items: center;
+}
+
+.contact-text h2 {
+  font-size: 2.2rem;
+  color: #00ffcc;
+  margin-bottom: 15px;
+}
+
+.contact-text p {
+  line-height: 1.6;
+  opacity: 0.9;
+}
+
+.contact-info {
+  margin-top: 5px;
+}
+
+.contact-info div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+  font-size: 0.95rem;
+}
+
+.contact-info i {
+  color: #00ffcc;
+  font-size: 1.1rem;
+}
+
+.contact-form {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px;
+  border-radius: 14px;
+  backdrop-filter: blur(8px);
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  padding: 14px;
+  border-radius: 10px;
+  color: #fff;
+  margin-bottom: 18px;
+  font-size: 0.95rem;
+}
+
+.contact-form textarea {
+  resize: none;
+  height: 130px;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  outline: none;
+  border-color: #00ffcc;
+}
+
+.contact-form button {
+  width: 100%;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #00ffcc;
+  color: #020617;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.contact-form button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+/* 📱 Mobile */
+@media (max-width: 800px) {
+  .contact-container {
+    grid-template-columns: 1fr;
+  }
+}
+</style>
+<style> 
+/* ===============================
+   🌙 DARK THEME (Balanced)
+   =============================== */
+
+/* Page background */
+body.dark {
+  background: #0f172a;
+  color: #e5e7eb;
+}
+
+/* Header */
+body.dark .header,
+body.dark .header-menu {
+  background: #020617;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+}
+
+body.dark .header h1,
+body.dark .header .menu-icon {
+  color: #00cc88;
+}
+
+/* Header menu items */
+body.dark .header-menu a,
+body.dark .logoutbtn {
+  color: #e5e7eb;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+body.dark .header-menu a:hover {
+  background: rgba(0,204,136,0.15);
+}
+
+body.dark .logoutbtn {
+  color: #f87171;
+}
+
+/* Cards & containers */
+body.dark .balance-card,
+body.dark .project-card,
+body.dark .task-card,
+body.dark .admin-card,
+body.dark .modal-content {
+  background: #111827; /* lighter than page */
+  border: 1px solid rgba(255,255,255,0.06);
+  color: #e5e7eb;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.45);
+}
+
+/* Pages & scroll areas */
+body.dark .projectContainer,
+body.dark .page,
+body.dark .third-page {
+  background: #0b1220;
+}
+
+/* Titles */
+body.dark .project-title,
+body.dark .task-title {
+  color: #00cc88;
+}
+
+/* Descriptions */
+body.dark .project-desc,
+body.dark .task-meta {
+  color: #cbd5f5;
+}
+
+/* Meta blocks */
+body.dark .project-meta {
+  background: #1f2933;
+  color: #e5e7eb;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+body.dark .project-meta span:first-child {
+  color: #00cc88;
+}
+
+body.dark .project-meta span:last-child {
+  color: #93c5fd;
+}
+
+/* Inputs */
+body.dark input,
+body.dark textarea {
+  background: #0b1220;
+  border: 1px solid rgba(255,255,255,0.12);
+  color: #e5e7eb;
+}
+
+body.dark input::placeholder,
+body.dark textarea::placeholder {
+  color: #94a3b8;
+}
+
+body.dark input:focus,
+body.dark textarea:focus {
+  border-color: #00cc88;
+  background: #0b1220;
+}
+
+/* Buttons */
+body.dark .balance-buttons button,
+body.dark .complete-task-btn,
+body.dark button.primary,
+body.dark #confirmVReportEdit {
+  background: #00cc88;
+  color: #022c22;
+}
+
+/* Status badges */
+body.dark .status-in-progress {
+  background: rgba(0,204,136,0.25);
+  border: 1px solid rgba(0,204,136,0.5);
+}
+
+body.dark .status-completed {
+  background: rgba(59,91,219,0.25);
+  border: 1px solid rgba(59,91,219,0.5);
+}
+
+body.dark .status-v-report {
+  background: rgba(239,68,68,0.25);
+  border: 1px solid rgba(239,68,68,0.5);
+}
+
+/* Modals */
+body.dark .modalip {
+  background: #111827;
+  color: #e5e7eb;
+}
+
+body.dark .modalip h2 {
+  color: #00cc88;
+}
+
+body.dark .modal-overlay {
+  background: rgba(2,6,23,0.85);
+}
+
+/* Loading overlay */
+body.dark #loadingOverlay {
+  background: rgba(2,6,23,0.85);
+}
+
+body.dark #loadingOverlay .spinner {
+  border-color: rgba(255,255,255,0.3);
+  border-top-color: #00cc88;
+}
+
+/* Links */
+body.dark .task-link,
+body.dark a {
+  color: #60a5fa;
+}
+
+/* Admin */
+body.dark .admin-name {
+  color: #e5e7eb;
+}
+
+body.dark .admin-bio {
+  color: #94a3b8;
+}
+
+/* Close buttons */
+body.dark #closeVReportPage {
+  color: #94a3b8;
+}
+body.dark .social-item {
+  background: transparent;
+  border: 1px solid #ccc;
+  color: #ccc;
+}
+</style>
+</head>
+<body>
+
+<!-- ================= DASHBOARD ================= -->
+<div class="header">
+  <h1>SociHub</h1>
+  <div class="menu-icon" id="menuToggle">&#9776;</div>
+
+  <!-- Dropdown menu -->
+  <div class="header-menu" id="headerMenu">
+    <a id="contact">Contact us</a>
+    <a href="rules.html">FAQ</a>
+    <a id="theme-toggle">Theme</a>
+   <div class="logoutbtn" onclick="logout()">Logout</div>
+  </div>
+</div>
+<div id="slidePanel" class="slide-panel">
+  <span id="closePanel" class="close-btn">&times;</span>
+  <div id="panelContent"></div>
+</div>
+<div class="modalip-bg" id="modalBg">
+  <div class="modalip">
+    <h2>Creating Project...</h2>
+    <div class="stats">
+   <p>Total: <span id="wantedCount">0</span></p>
+      <p>Completed: <span id="scompletedCount">0</span></p>
+      <p style="font-size:12px; font-weight:500;">Uncompleted: <span id="spendingCount">0</span></p>
+      <p>Status: <span id="firestoreStatus">idle</span></p>
+    </div>
+    <div class="progress-bar-bg">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+  </div>
+</div>
+<div class="main">
+    <div class="welcome">Glad to have you back, <span id="Username">Guest</span> 👋</div>     
+    <div class="balance-card">    
+    <div class="balance-header">Project Balance</div>    
+    <div class="balance-amount" id="balance">₦0.00</div>    
+<div class="balance-buttons">    
+<button class="Deposit" id="depositBtn" onclick="window.location.href='Dep.html'">Deposit</button>   
+
+  <button class="project-btn" onclick="openPage('projectPage')">Project</button>    
+</div>    
+    <div style="clear: both"></div>    
+  </div>      
+<h4><span id="pendingCount">0</span> Projects at Work</h4>
+<div id="inProgressContainer" class="projectContainer">
+  <span class="loaderPix">Loading...</span>
+</div>
+
+<h4><span id="completedCount">0</span> Completed Projects</h4>
+<div id="completedContainer" class="projectContainer">
+  <span class="loaderPix">Loading...</span>
+</div>
+
+<h4><span id="suspendedCount">0</span> Projects Suspended</h4>
+<div id="suspendedContainer" class="projectContainer">
+  <span class="loaderPix">Loading...</span>
+</div>
+<div></div>
+<!-- ================= PROJECT FULLSCREEN ================= -->
+<div class="page" id="projectPage">
+  <div class="page-header">
+    <button class="back-btn">&larr;</button>
+    <h2>Projects</h2>
+  </div>
+  <div class="social-column">
+    <div class="social-item" onclick="openPage('platformPage')">Create New Project</div>
+<div
+  class="social-item" id="openCompletedProjects">
+  Completed Projects
+</div>
+
+<div class="social-item" id="openInProgressProjects">
+  Projects In Progress
+</div>
+
+ <div class="social-item" id="openVReportProjects">
+  V-Report Projects
+</div>
+  </div>
+</div>
+
+<div id="completedProjects" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <h2 style="margin:0 auto;">Completed Projects</h2>
+  </div>
+
+  <div id="completedProjectsList" class="projects-list">
+    Loading...
+  </div>
+</div>
+<div id="vReportProjects" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <h2>V-Report Projects</h2>
+  </div>
+
+  <div id="vReportProjectsList" class="projects-list">
+    Loading...
+  </div>
+</div>
+
+<div id="inProgressProjects" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <h2>Projects In Progress</h2>
+  </div>
+
+  <div id="inProgressProjectsList" class="projects-list">
+    Loading...
+  </div>
+</div>
+
+<!-- ================= PLATFORM LIST ================= -->
+<div class="page" id="platformPage">
+  <div class="page-header">
+    <button class="back-btn">&larr;</button>
+    <h2>Create Project</h2>
+  </div>
+<div class="social-column">
+  <div class="social-item" onclick="openPlatform('facebook')">Facebook</div>
+  <div class="social-item" onclick="openPlatform('tiktok')">TikTok</div>
+  <div class="social-item" onclick="openPlatform('whatsapp')">WhatsApp</div>
+  <div class="social-item" onclick="openPlatform('instagram')">Instagram</div>
+  <div class="social-item" onclick="openPlatform('twitter')">Twitter</div>
+    <div class="social-item" id="otherp">Create other Project here</div>
+</div>
+
+<div id="tasksContainer"></div>
+</div>
+
+<!-- ================= PLATFORM TASK LIST ================= -->
+<div class="page" id="platformTaskPage">
+  <div class="page-header">
+    <button class="back-btn">&larr;</button>
+    <h2 id="platformTitle">Tasks</h2>
+  </div>
+  <div class="social-column" id="platformTaskList"></div>
+</div>
+
+<!-- ================= TASK CREATOR ================= -->
+<div class="page" id="taskCreatorPage">
+  <div class="page-header">
+    <button class="back-btn">&larr;</button>
+    <h2 id="taskPageTitle">Create Task</h2>
+  </div>
+  <form id="taskForm">
+    <label style="margin-bottom: -13px">Task Title</label>
+    <input type="text" id="taskTitle" readonly>
+    <label style="margin-bottom: -13px">Description</label>
+    <textarea id="taskDesc" rows="4" required></textarea>
+    <button type="button" id="autoFillBtn">Auto Fill</button>
+
+    <!-- Reward Select -->
+    <label for="taskReward" style="margin-bottom: -15px">Reward</label>
+    <div class="custom-select" id="rewardSelect">
+      <div class="selected">Select reward</div>
+      <div class="options">
+       <div class="option" data-value="30">30</div>
+        <div class="option" data-value="50">50</div>
+        <div class="option" data-value="100">100</div>
+        <div class="option" data-value="200">200</div>
+      </div>
+    </div>
+<input type="hidden" id="taskReward" name="taskReward" value="">    
+
+    <!-- Number of Engagers -->
+    <label for="numEngagers" style="margin-bottom: -15px">Engagements</label>
+    <div class="custom-select" id="engagerSelect">
+      <div class="selected">Select number</div>
+  <div class="options">   
+  <div class="option" data-value="2">2</div>    
+  <div class="option" data-value="10">10</div>    
+    <div class="option" data-value="50">50</div>    
+    <div class="option" data-value="100">100</div>    
+    <div class="option" data-value="200">200</div>    
+    <div class="option" data-value="300">300</div>    
+    <div class="option" data-value="400">400</div>    
+    <div class="option" data-value="500">500</div>    
+    <div class="option" data-value="600">600</div>    
+    <div class="option" data-value="700">700</div>    
+    <div class="option" data-value="800">800</div>    
+    <div class="option" data-value="800">900</div>    
+    <div class="option" data-value="1000">1000</div>    
+  </div> 
+    </div>
+    <input type="hidden" id="numEngagersInput" name="numEngagers" value="">
+
+
+<div id="calcStatus" style="margin-top:8px; font-size:13px; color:#00cc88; display:none;">    
+  <span id="calcLoader">⏳ Calculating...</span>    
+</div>  <div id="calcResult" style="margin-top:10px; font-size:14px; font-weight:600; display:none;"></div>
+
+
+<label for="taskLink" style="margin-bottom: -13px">Post Link</label>    
+<input type="url" id="taskLink" placeholder="https://facebook.com/..." required>    
+<span id="linkError" style="color: red; font-size: 12px; display: none;">Invalid URL</span>    
+<!-- SELECT ADMIN -->
+<div class="form-group">
+  <button
+    type="button"
+    id="selectAdminBtn"
+    class="select-admin-btn"
+  >Select Admin</button>
+
+  <div id="selectedAdminPreview" class="selected-admin-preview">
+    No admin selected
+  </div>
+<div id="formError" class="form-error" style="display:none; margin: 20px 0;">    
+  Please select reward and number of engagement to continue.    
+</div>    
+  <!-- Hidden inputs to store selection -->
+  <input type="hidden" id="selectedAdminId">
+  <input type="hidden" id="selectedAdminName">
+</div>
+
+<!-- ADMIN SELECT PAGE -->
+<div id="adminSelectPage" class="page">
+  <div class="page-header">
+    <button class="back-btn">←</button>
+    <h2>Select Admin</h2>
+  </div>
+
+  <div id="adminList" class="admin-list">
+    Loading admins...
+  </div>
+</div>
+      <!-- Submit Button -->    
+      <button type="submit" class="complete-task-btn">Create Task</button>    
+      <!-- Overlay -->
+<div id="loadingOverlay">
+  <div class="overlay-content">
+    <div class="spinner"></div>
+    <p>Creating Project<br><small>..This might take a while..</small></p>
+  </div>
+</div>
+    </form>    
+</div>
+  <div id="completedProjectPageTasks" class="third-page">
+    <div class="third-page-header">  
+      <button id="closeCompletedPage">&larr;</button>  
+      <h2>Completed Project Tasks</h2>  
+      <button id="rateAdminBtn" style="background:none;border:none;color:#00cc88;font-weight:600;">  
+        Rate your admin  
+      </button> 
+    </div>   
+    <div id="taskList"></div>  
+  </div>
+
+  <!-- FULLSCREEN OVERLAY -->
+  <div id="imageOverlay" style="
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.9);
+    justify-content:center;
+    align-items:center;
+    z-index:12000;
+    cursor: zoom-out;
+  ">
+    <img id="overlayImage" src="" style="
+      max-width:90%;
+      max-height:90%;
+      transform: scale(1);
+      transition: transform 0.3s;
+      cursor: grab;
+    "></div>
+  </div>
+  
+</body>
+
+<div id="vReportProjectPage" class="third-page">
+  <div class="third-page-header">
+    <button id="closeVReportPage">&times;</button>
+    <h2>Suspended Project Details</h2>
+  </div>
+
+  <div id="vReportDetails" class="third-page-body">
+    <!-- injected content -->
+  </div>
+</div>
+<!-- Flag Modal -->
+<div id="flagModal" class="modal">
+  <div class="modal-content">
+    <h3>Flag Task</h3>
+<p>
+  Before proceeding, do you feel that this earner went against  
+  <a href="1page.html#earners">our task rules?</a>
+</p>
+    </p>
+    <p>Are you sure you want to flag this task?</p>
+    <div class="modal-buttons">
+      <button id="confirmFlag" class="flag-btn">Go ahead</button>
+      <button id="cancelFlag" class="cancel-btn">Cancel</button>
+    </div>
+  </div>
+</div>
+<div id="alertModal" class="modal-overlay" style="display:none;">
+  <div class="modal-content">
+    <div id="alertModalMessage" class="modal-message"></div>
+    <div class="modal-buttons">
+      <button id="alertModalOkBtn">OK</button>
+    </div>
+  </div>
+</div>
+<script>
+const panel = document.getElementById("slidePanel");
+const panelContent = document.getElementById("panelContent");
+const closeBtn = document.getElementById("closePanel");
+
+// Open panel with content and push state
+function openPanel(content, stateName) {
+  panelContent.innerHTML = content;
+  panel.classList.add("active");
+  history.pushState({panel: stateName}, stateName, "#" + stateName);
+}
+
+// Close panel and go back
+function closePanel() {
+  panel.classList.remove("active");
+  history.back(); // go back in history
+}
+
+// Close button event
+closeBtn.addEventListener("click", closePanel);
+
+
+document.getElementById("contact").addEventListener("click", () => {
+  openPanel(`<section class="contact-section" id="contact">
+  <div class="contact-container">
+    
+    <div class="contact-text">
+      <h2>Contact Us</h2>
+      <p>
+        Have questions, feedback, or need support?  
+        Reach out to the SociHub team and we’ll get back to you as soon as possible.
+      </p>
+
+      <div class="contact-info">
+        <div>
+          <i class="fa-solid fa-envelope"></i>
+          <span>support@socihub.com</span>
+        </div>
+        <div>
+          <i class="fa-solid fa-globe"></i>
+          <span>www.socihub.com</span>
+        </div>
+      </div>
+    </div>
+
+    <form class="contact-form">
+      <input type="text" placeholder="Your Name" required>
+      <input type="email" placeholder="Your Email" required>
+      <textarea placeholder="Your Message" required></textarea>
+<a href="mailto:socihubintl@gmail.com">
+  <button type="button">Send Message</button>
+</a>
+    </form>
+
+  </div>
+</section>`);
+});
+
+// Optional: Close panel if user clicks outside
+panel.addEventListener("click", (e) => {
+  if(e.target === panel) closePanel();
+});
+
+
+  const themeToggle = document.getElementById("theme-toggle");
+
+  // Set initial theme based on localStorage or default to light
+  if(localStorage.getItem("theme") === "dark") {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.add("light");
+  }
+
+  themeToggle.addEventListener("click", () => {
+    if (document.body.classList.contains("light")) {
+      document.body.classList.remove("light");
+      document.body.classList.add("dark");
+      localStorage.setItem("theme", "dark");
+    } else {
+      document.body.classList.remove("dark");
+      document.body.classList.add("light");
+      localStorage.setItem("theme", "light");
+    }
+  });
+
+</script>
+<script type="module">
+/* ===============================
+   FIREBASE IMPORTS
+=============================== */
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, getDoc, collection, addDoc, query, where, getDocs, updateDoc, serverTimestamp, setDoc, onSnapshot, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* ===============================
+   FIREBASE CONFIG & INIT
+=============================== */
+const firebaseConfig = {
+  apiKey: "AIzaSyAK4b3ASYB0USFC6cNQiQ9DA3_ROS48RYI",
+  authDomain: "socihub-a2731.firebaseapp.com",
+  projectId: "socihub-a2731",
+  storageBucket: "socihub-a2731.firebasestorage.app",
+  messagingSenderId: "815252223754",
+  appId: "1:815252223754:web:99a26383a59c2557412cf3",
+  measurementId: "G-KXW58D7RGM"
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+/* ===============================
+   PLATFORM TASKS
+=============================== */
+const PLATFORM_TASKS = {
+  facebook: [
+    { title: "Like Facebook Post", autoDesc: "Like the post and comment 'Great content!'" },
+    { title: "Follow Facebook Page", autoDesc: "Follow the page and stay active for 24 hours" },
+    { title: "Share Facebook Post", autoDesc: "Share the post on your timeline" },
+    { title: "React to Facebook Story", autoDesc: "React to the story with an emoji" },
+    { title: "Join Facebook Group", autoDesc: "Request to join the group and stay active" },
+    { title: "Invite Friends to Page", autoDesc: "Invite at least 3 friends to like the page" },
+    { title: "Comment on Post", autoDesc: "Leave a meaningful comment on the post" },
+    { title: "Watch Facebook Video", autoDesc: "Watch the full video and react" }
+  ],
+
+  tiktok: [
+    { title: "Like TikTok Video", autoDesc: "Like the video and watch for at least 10 seconds" },
+    { title: "Follow TikTok Account", autoDesc: "Follow the account and do not unfollow" },
+    { title: "Comment on TikTok Video", autoDesc: "Leave a relevant comment" },
+    { title: "Share TikTok Video", autoDesc: "Share the video to your friends or groups" },
+    { title: "Watch TikTok Video Fully", autoDesc: "Watch the video till the end without skipping" },
+    { title: "React to TikTok Live", autoDesc: "Join the live session and react" },
+    { title: "Duet TikTok Video", autoDesc: "Create a duet using the video" }
+  ],
+
+  whatsapp: [
+    { title: "Join WhatsApp Group", autoDesc: "Join the group and stay active" },
+    { title: "Share WhatsApp Message", autoDesc: "Forward the message to at least 5 contacts" },
+    { title: "React to Message", autoDesc: "React to the pinned message with an emoji" },
+    { title: "Follow WhatsApp Channel", autoDesc: "Follow the WhatsApp channel and stay active" },
+    { title: "Repost a Post on Whatsapp", autoDesc: "Repost the following video and submit task after 23hrs" }
+  ],
+
+  instagram: [
+    { title: "Like Instagram Post", autoDesc: "Like the post and comment appropriately" },
+    { title: "Follow Instagram Account", autoDesc: "Follow the account and stay engaged" },
+    { title: "Share Instagram Story", autoDesc: "Share the story to your followers" },
+    { title: "Comment on Post", autoDesc: "Leave a meaningful comment on the post" },
+    { title: "Save Instagram Post", autoDesc: "Save the post to your collection" },
+    { title: "React to Story", autoDesc: "Reply or react to the story" }
+  ],
+
+  twitter: [
+    { title: "Like Tweet", autoDesc: "Like the tweet and retweet if needed" },
+    { title: "Follow Twitter Account", autoDesc: "Follow the account and engage" },
+    { title: "Retweet Tweet", autoDesc: "Retweet the post on your timeline" },
+    { title: "Reply to Tweet", autoDesc: "Reply meaningfully to the tweet" },
+    { title: "Quote Tweet", autoDesc: "Quote the tweet with your comment" }
+  ],
+
+  linkedin: [
+    { title: "Like LinkedIn Post", autoDesc: "Like the post and optionally comment" },
+    { title: "Follow LinkedIn Page", autoDesc: "Follow the company or page" },
+    { title: "Share LinkedIn Post", autoDesc: "Share the post with your network" },
+    { title: "Comment on LinkedIn Post", autoDesc: "Write a relevant comment" },
+    { title: "Endorse Skills", autoDesc: "Endorse at least 2 skills of connections" }
+  ],
+
+  youtube: [
+    { title: "Like YouTube Video", autoDesc: "Like the video and leave a comment" },
+    { title: "Subscribe to Channel", autoDesc: "Subscribe and turn on notifications" },
+    { title: "Share Video", autoDesc: "Share the video with friends or on social media" },
+    { title: "Watch Video Fully", autoDesc: "Watch the video till the end" },
+    { title: "Comment on Video", autoDesc: "Leave a meaningful comment on the video" }
+  ]
+};
+
+/* ===============================
+   PAGE NAVIGATION
+=============================== */
+const menuToggle = document.getElementById("menuToggle");
+const header = document.querySelector(".header");
+
+menuToggle.addEventListener("click", () => {
+  header.classList.toggle("open");
+});
+
+document.addEventListener("click", (e) => {
+  if (!header.contains(e.target)) {
+    header.classList.remove("open");
+  }
+});
+let pageStack = [];
+window.addEventListener("popstate", (event) => {
+  const flagModal = document.getElementById("flagModal");
+  const overlay   = document.getElementById("imageOverlay");
+
+  // 1️⃣ Close flag modal if open
+  if (flagModal?.classList.contains("active")) {
+    flagModal.classList.remove("active");
+    document.body.style.overflow = "";
+    return;
+  }
+
+  // 2️⃣ Close image overlay if open
+  if (overlay?.style.display === "flex") {
+    overlay.style.display = "none";
+    document.body.style.overflow = "";
+    return;
+  }
+
+  // 3️⃣ Handle pageStack
+  if (pageStack.length > 0) {
+    const lastPageId = pageStack[pageStack.length - 1];
+    const lastPage = document.getElementById(lastPageId);
+    if (lastPage?.classList.contains("active")) {
+      lastPage.classList.remove("active");
+      pageStack.pop();
+      return;
+    }
+  }
+
+  // 4️⃣ Handle panels (from event.state)
+  if (event.state?.panel) {
+    const panel = document.getElementById(event.state.panel);
+    if (panel) panel.classList.add("active");
+    return;
+  } else if (event.state === null && typeof panel !== "undefined") {
+    // no state = close panel
+    panel.classList.remove("active");
+  }
+});
+let scrollPositions = {}; // keep per-page scroll
+
+function openPage(pageId) {
+  const page = typeof pageId === "string" ? document.getElementById(pageId) : pageId;
+  if (!page || page.classList.contains("active")) return;
+
+  // Save scroll of current active page
+  const activePage = document.querySelector(".page.active");
+  if (activePage) {
+    scrollPositions[activePage.id] = window.scrollY;
+  }
+
+  page.classList.add("active");
+  pageStack.push(page.id);
+  history.pushState({ pageId: page.id }, "");
+
+  // Restore scroll for new page (optional)
+  window.scrollTo(0, scrollPositions[page.id] || 0);
+}
+
+function goBack() {
+  if (pageStack.length > 0) {
+    const lastPageId = pageStack.pop();
+    const page = document.getElementById(lastPageId);
+    if (page) page.classList.remove("active");
+
+    // Restore scroll
+    const previousPageId = pageStack[pageStack.length - 1];
+    if (previousPageId) {
+      const prevScroll = scrollPositions[previousPageId] || 0;
+      window.scrollTo(0, prevScroll);
+    }
+  }
+}
+
+function closePage(pageId) {
+  const page = typeof pageId === "string" ? document.getElementById(pageId) : pageId;
+  if (page) page.classList.remove("active");
+  const index = pageStack.indexOf(page.id);
+  if (index > -1) pageStack.splice(index, 1);
+  history.back();
+}
+
+
+
+window.goBack = goBack;
+window.openPage = openPage;
+
+document.querySelectorAll('.back-btn').forEach(btn => btn.addEventListener('click', goBack));
+document.getElementById("taskForm").addEventListener("submit", (e) => {
+  e.preventDefault(); // STOP the page reload / scroll reset
+  createProject();    // your function to handle project creation
+});
+/* ===============================
+   PLATFORM TASK LIST
+=============================== */
+function openPlatform(platform) {
+  const list = document.getElementById("platformTaskList");
+  const title = document.getElementById("platformTitle");
+  if (!list || !title) return;
+
+  list.innerHTML = "";
+  title.textContent = `${platform.charAt(0).toUpperCase() + platform.slice(1)} Tasks`;
+
+  PLATFORM_TASKS[platform]?.forEach(task => {
+    const div = document.createElement("div");
+    div.className = "social-item";
+    div.textContent = task.title;
+    div.onclick = () => openTaskCreator(task);
+    list.appendChild(div);
+  });
+
+  openPage("platformTaskPage");
+}
+
+window.openPlatform = openPlatform;
+// ---------------- DOM PAGES ----------------
+const platformPage = document.getElementById("platformPage");
+const taskCreatorPage = document.getElementById("taskCreatorPage");
+
+// Social item for creating a new project
+const createProjectBtn = document.getElementById("otherp");
+
+// Task title input
+const taskTitleInput = document.getElementById("taskTitle");
+
+// Open Task Creator Page
+createProjectBtn.addEventListener("click", () => {
+  // Reset the form
+  const form = document.getElementById("taskForm");
+  form.reset();
+
+  // Make task title editable for manual input
+  taskTitleInput.removeAttribute("readonly");
+  taskTitleInput.value = "";
+
+  // Update header
+  document.getElementById("taskPageTitle").textContent = "Create New Task";
+
+  // Open task creator page properly (history + stack)
+  openPage("taskCreatorPage");
+});
+
+taskCreatorPage.querySelector(".back-btn").addEventListener("click", () => {
+  // Restore readonly
+  taskTitleInput.setAttribute("readonly", true);
+
+
+});
+/* ===============================
+   TASK CREATOR
+=============================== */
+let currentTask = null;
+
+function openTaskCreator(task) {
+  currentTask = task;
+  const taskPageTitle = document.getElementById("taskPageTitle");
+  const taskTitleInput = document.getElementById("taskTitle");
+  const taskDesc = document.getElementById("taskDesc");
+  if (taskPageTitle && taskTitleInput && taskDesc) {
+    taskPageTitle.textContent = `Create ${task.title}`;
+    taskTitleInput.value = task.title;
+    taskDesc.value = "";
+    openPage("taskCreatorPage");
+  }
+}
+
+const autoFillBtn = document.getElementById("autoFillBtn");
+if (autoFillBtn) {
+  autoFillBtn.onclick = () => {
+    if (!currentTask) return;
+    const taskDesc = document.getElementById("taskDesc");
+    if (taskDesc) taskDesc.value = currentTask.autoDesc;
+  };
+}
+
+/* ===============================
+   CUSTOM SELECTS
+=============================== */
+function setupCustomSelect(selectEl, selectedEl, optionsEl, hiddenInput) {
+  const options = optionsEl.querySelectorAll(".option");
+
+  selectedEl.addEventListener("click", e => {
+    e.stopPropagation();
+    const isActive = optionsEl.style.display === "flex";
+    document.querySelectorAll(".custom-select .options").forEach(o => o.style.display = "none");
+    optionsEl.style.display = isActive ? "none" : "flex";
+    selectEl.classList.toggle("active", !isActive);
+  });
+
+  options.forEach(option => {
+    option.addEventListener("click", e => {
+      e.stopPropagation();
+      selectedEl.innerHTML = option.textContent + ' <span class="arrow">&#9662;</span>';
+      hiddenInput.value = option.dataset.value;
+      optionsEl.style.display = "none";
+      selectEl.classList.remove("active");
+      calculateCost();
+    });
+  });
+
+  document.addEventListener("click", () => {
+    optionsEl.style.display = "none";
+    selectEl.classList.remove("active");
+  });
+}
+
+const rewardSelect = document.getElementById("rewardSelect");
+const selectedReward = rewardSelect.querySelector(".selected");
+const hiddenReward = document.getElementById("taskReward");
+
+const engagerSelect = document.getElementById("engagerSelect");
+const selectedEngager = engagerSelect.querySelector(".selected");
+const hiddenEngager = document.getElementById("numEngagersInput");
+
+setupCustomSelect(rewardSelect, selectedReward, rewardSelect.querySelector(".options"), hiddenReward);
+setupCustomSelect(engagerSelect, selectedEngager, engagerSelect.querySelector(".options"), hiddenEngager);
+
+/* ===============================
+   TASK LINK VALIDATION
+=============================== */
+const taskLinkInput = document.getElementById("taskLink");
+const linkError = document.getElementById("linkError");
+
+function isValidURL(str) {
+  try {
+    const url = new URL(str);
+    return url.protocol === "http:" || url.protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+taskLinkInput.addEventListener("paste", e => {
+  e.preventDefault();
+  const text = (e.clipboardData || window.clipboardData).getData("text").trim();
+  if (isValidURL(text)) {
+    taskLinkInput.value = text;
+    taskLinkInput.classList.add("valid");
+    taskLinkInput.classList.remove("invalid");
+    linkError.style.display = "none";
+  } else {
+    taskLinkInput.value = "";
+    taskLinkInput.classList.add("invalid");
+    taskLinkInput.classList.remove("valid");
+    linkError.style.display = "block";
+  }
+});
+
+taskLinkInput.addEventListener("input", () => {
+  taskLinkInput.classList.remove("invalid");
+  linkError.style.display = "none";
+});
+
+taskLinkInput.addEventListener("blur", () => {
+  if (taskLinkInput.value && !isValidURL(taskLinkInput.value)) {
+    taskLinkInput.classList.add("invalid");
+    taskLinkInput.classList.remove("valid");
+    linkError.style.display = "block";
+  }
+});
+
+/* ===============================
+   COST CALCULATION
+=============================== */
+const PLATFORM_PERCENT = 0.50;
+let clientPays = 0;
+const calcStatus = document.getElementById("calcStatus");
+const calcLoader = document.getElementById("calcLoader");
+const calcResult = document.getElementById("calcResult");
+const form = document.getElementById("taskForm");
+const submitBtn = form.querySelector(".complete-task-btn");
+const formError = document.getElementById("formError");
+let calculationDone = false;
+
+function calculateCost() {
+  const reward = Number(hiddenReward.value);
+  const engagers = Number(hiddenEngager.value);
+  if (!reward || !engagers) return;
+
+  submitBtn.disabled = true;
+  calculationDone = false;
+
+  calcStatus.style.display = "block";
+  calcResult.style.display = "none";
+  calcLoader.textContent = "⏳ Calculating...";
+
+  setTimeout(() => {
+    const engagementValue = reward * engagers;
+    const platformFee = engagementValue * PLATFORM_PERCENT;
+
+    // ✅ STORE IT GLOBALLY
+    clientPays = engagementValue + platformFee;
+
+    calcStatus.style.display = "none";
+    calcResult.style.display = "block";
+    calcResult.style.color = "#00cc88";  
+    calcResult.innerHTML = `
+      Engagement Fee: ₦${engagementValue.toLocaleString()} <br>
+      Platform Fee: ₦${platformFee.toLocaleString()} <br>
+      <strong>Client Pays: ₦${clientPays.toLocaleString()}</strong>
+    `;
+
+    calculationDone = true;
+    enableSubmitIfReady();
+  }, 800);
+}
+
+function enableSubmitIfReady() {
+  submitBtn.disabled = !(hiddenReward.value && hiddenEngager.value && calculationDone);
+  if (hiddenReward.value && hiddenEngager.value && calculationDone) formError.style.display = "none";
+}
+
+function validateForm() {
+  if (!hiddenReward.value || !hiddenEngager.value) {
+    formError.textContent = "Select reward and number of engagements";
+    formError.style.display = "block";
+    return false;
+  }
+
+  if (!document.getElementById("selectedAdminId").value) {
+    formError.textContent = "Please select an admin for this project";
+    formError.style.display = "block";
+    return false;
+  }
+
+  if (!calculationDone || clientPays <= 0) {
+    formError.textContent = "Please calculate project cost first";
+    formError.style.display = "block";
+    return false;
+  }
+
+  return true;
+}
+function showOverlay() {
+  document.getElementById("loadingOverlay").style.display = "flex";
+  document.body.style.overflow = "hidden"; // disable scroll
+}
+
+function showAlertModal(message, okBtn = true) {
+  return new Promise(resolve => {
+    const modal = document.getElementById("alertModal");
+    const msg = document.getElementById("alertModalMessage");
+    const okButton = document.getElementById("alertModalOkBtn");
+
+    msg.textContent = message;
+
+    if (okBtn) {
+      okButton.style.display = "inline-block";
+    } else {
+      okButton.style.display = "none";
+    }
+
+    // Show modal
+    modal.style.display = "flex";
+
+    // OK button click
+    okButton.onclick = () => {
+      modal.style.display = "none";
+      resolve(true);
+    };
+
+    // Click outside modal to close (optional)
+    modal.onclick = (e) => {
+      if (e.target === modal) {
+        modal.style.display = "none";
+        resolve(false);
+      }
+    };
+  });
+}
+
+function hideOverlay() {
+  document.getElementById("loadingOverlay").style.display = "none";
+  document.body.style.overflow = ""; // restore scroll
+}
+/* ===============================
+   FORM SUBMISSION
+===============================*/
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch(err => {
+  if (err.code === 'failed-precondition') console.warn("Persistence can only be enabled in one tab.");
+  else if (err.code === 'unimplemented') console.warn("Persistence is not available in this browser.");
+});
+
+// Pending queue & progress tracking
+let pendingProjects = [];
+let currentProgress = { completed: 0, total: 0 };
+
+// Modal elements
+const modalBg = document.getElementById("modalBg");
+const scompletedEl = document.getElementById("scompletedCount");
+const spendingEl = document.getElementById("spendingCount");
+const wantedEl = document.getElementById("wantedCount");
+const firestoreEl = document.getElementById("firestoreStatus");
+const progressBar = document.getElementById("progressBar");
+
+// Show modal
+function showModal(totalTasks) {
+  modalBg.classList.add("active");
+  currentProgress.completed = 0;
+  currentProgress.total = totalTasks;
+  scompletedEl.textContent = 0;
+  spendingEl.textContent = totalTasks;
+  wantedEl.textContent = totalTasks;
+  firestoreEl.textContent = "Creating...";
+  progressBar.style.width = "0%";
+}
+
+// Update modal
+function updateModal(completed, total, status = "Creating...") {
+  currentProgress.completed = completed;
+  currentProgress.total = total;
+  scompletedEl.textContent = completed;
+  spendingEl.textContent = total - completed;
+  wantedEl.textContent = total;
+  firestoreEl.textContent = status;
+  progressBar.style.width = Math.round((completed / total) * 100) + "%";
+}
+
+// Hide modal
+function hideModal(message = "Done") {
+  firestoreEl.textContent = message;
+  progressBar.style.width = "100%";
+  setTimeout(() => modalBg.classList.remove("active"), 1000);
+}
+
+// Retry pending projects when online
+window.addEventListener("online", () => retryPendingProjects());
+
+// Helper to generate codes
+const generateCode = length => {
+  const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+  return Array.from({ length }, () => chars.charAt(Math.floor(Math.random() * chars.length))).join('');
+};
+
+// Safe project+task creation with resume support
+async function safeCreateProjectWithTasks(projectData, taskList, progressCallback, startFrom = 0) {
+  const projectRef = doc(collection(db, "projects"));
+  projectData.projectId = projectRef.id;
+
+  try {
+    // Only create project if starting from 0
+    if (startFrom === 0) await setDoc(projectRef, projectData);
+
+    for (let i = startFrom; i < taskList.length; i++) {
+      const task = taskList[i];
+     task.projectId = projectData.projectId;
+      // Pause if offline
+      while (!navigator.onLine) await new Promise(resolve => setTimeout(resolve, 1000));
+
+      await addDoc(collection(db, "tasks"), task);
+
+      if (progressCallback) progressCallback(i + 1);
+    }
+
+    console.log("Project created successfully:", projectData.projectCode);
+    return true;
+  } catch (err) {
+    console.warn("Creation interrupted, adding to retry queue:", projectData.projectCode);
+    pendingProjects.push({
+      projectData,
+      taskList,
+      progressCallback,
+      startFrom: currentProgress.completed
+    });
+    return false;
+  }
+}
+
+// Retry any pending projects automatically
+async function retryPendingProjects() {
+  if (!navigator.onLine || pendingProjects.length === 0) return;
+
+  const queue = [...pendingProjects];
+  pendingProjects = [];
+
+  for (const item of queue) {
+    const remainingTasks = item.taskList.slice(item.startFrom || 0);
+    await safeCreateProjectWithTasks(item.projectData, remainingTasks, item.progressCallback, item.startFrom || 0);
+  }
+}
+
+// Form submission
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+  if (!navigator.onLine) return await showAlertModal("You are offline. Cannot submit form.", true);
+
+  submitBtn.disabled = true;
+  if (!validateForm()) { submitBtn.disabled = false; return; }
+
+  showOverlay();
+
+  const paymentSuccess = await handlePaymentAndCreateProject();
+  hideOverlay();
+  if (!paymentSuccess) { submitBtn.disabled = false; return; }
+const engagementValue = Number(hiddenReward.value) * Number(hiddenEngager.value);
+
+
+  const projectCode = generateCode(6);
+  const projectData = {
+    projectStatus: "in-progress",
+    title: taskTitle.value,
+    description: taskDesc.value,
+    reward: Number(hiddenReward.value),
+    engagers: Number(hiddenEngager.value),
+    projectFee: clientPays,
+    engagementFee: engagementValue, 
+    adminId: document.getElementById("selectedAdminId").value,
+    adminName: document.getElementById("selectedAdminName").value,
+    link: taskLinkInput.value,
+    projectCode,
+    createdAt: new Date(),
+    createdBy: auth.currentUser.uid,
+    createdByName: clientName
+  };
+
+  // Prepare tasks
+  const numEngagers = Number(hiddenEngager.value);
+  const earnersSnap = await getDocs(query(collection(db, "users"), where("role", "==", "earner")));
+  const earners = earnersSnap.docs.map(doc => doc.id);
+  const selectedEarners = earners.slice(0, numEngagers);
+  const extraTasks = numEngagers - selectedEarners.length;
+
+  const taskList = [];
+
+  for (const earnerId of selectedEarners) {
+    taskList.push({
+      projectId: projectData.projectId,
+      projectCode,
+      title: taskTitle.value,
+      description: taskDesc.value,
+      reward: Number(hiddenReward.value),
+      link: taskLinkInput.value,
+      status: "Available",
+      assignedTo: earnerId,
+      taskCode: generateCode(8),
+      adminId: projectData.adminId,
+      adminName: projectData.adminName,
+      createdAt: new Date(),
+      createdBy: auth.currentUser.uid,
+      createdByName: clientName
+    });
+  }
+
+  for (let i = 0; i < extraTasks; i++) {
+    taskList.push({
+      projectId: projectData.projectId,
+      projectCode,
+      title: taskTitle.value,
+      description: taskDesc.value,
+      reward: Number(hiddenReward.value),
+      link: taskLinkInput.value,
+      status: "Available",
+      assignedTo: null,
+      taskCode: generateCode(8),
+      adminId: projectData.adminId,
+      adminName: projectData.adminName,
+      createdAt: new Date(),
+      createdBy: auth.currentUser.uid,
+      createdByName: clientName
+    });
+  }
+
+  // Show modal
+  showModal(taskList.length);
+
+  await safeCreateProjectWithTasks(projectData, taskList, completed => {
+    updateModal(completed, taskList.length, "Creating...");
+  });
+
+  hideModal("Project Created!");
+  form.reset();
+  hiddenReward.value = "";
+  hiddenEngager.value = "";
+  calcResult.style.display = "none";
+  calcStatus.style.display = "none";
+
+  await reloadClientBalance();
+  closePage(document.getElementById("taskCreatorPage"));
+  loadClientProjects(auth.currentUser.uid);
+
+  submitBtn.disabled = false;
+});
+/* ===============================
+   LOAD CLIENT PROJECTS
+=============================== */
+let clientName = "Unknown";
+
+// Fetch client name as soon as page loads or user is authenticated
+async function fetchClientName() {
+  if (!auth.currentUser) return;
+
+  try {
+    const clientRef = doc(db, "users", auth.currentUser.uid);
+    const clientSnap = await getDoc(clientRef);
+    if (clientSnap.exists()) {
+      clientName = clientSnap.data().name || "Unknown";
+      console.log("Fetched client name:", clientName);
+    } else {
+      console.warn("Client document does not exist");
+    }
+  } catch (err) {
+    console.error("Error fetching client name:", err);
+  }
+}
+
+async function reloadClientBalance() {
+  if (!auth.currentUser) return;
+
+  const clientRef = doc(db, "users", auth.currentUser.uid);
+  const clientSnap = await getDoc(clientRef);
+  if (!clientSnap.exists()) return;
+
+  const { balance = 0 } = clientSnap.data();
+
+  balanceDisplay.textContent = `₦${Number(balance).toLocaleString("en-NG")}`;
+}
+
+async function openCompletedProject(projectId) {
+  const page = document.getElementById("completedProjectPageTasks");
+  const list = document.getElementById("taskList");
+  list.innerHTML = "Loading...";
+
+  openPage(page);
+
+  const q = query(
+    collection(db, "tasks"),
+    where("projectId", "==", projectId)
+  );
+
+  const snap = await getDocs(q);
+  list.innerHTML = "";
+
+snap.forEach(docSnap => {
+  const t = docSnap.data();
+
+  // ✅ Convert Firestore timestamp to human-readable
+  const ts = t.submission?.submittedAt;
+  let submittedAtStr = "—";
+
+let filePreviewHTML = "";
+
+if (t.submission?.fileURL) {
+  const fileURL  = t.submission.fileURL;
+  const fileType = t.submission.fileType || "";
+
+if (fileType.startsWith("image/")) {    
+  filePreviewHTML = `    
+    <button onclick="openImageOverlay('${fileURL}')" 
+            style="border:none; background:none; padding:4px; cursor:zoom-in;
+              border: 1px solid rgba(59, 91, 219, 0.5); width:30%; background:rgba(59, 91, 219, 0.3); border-radius:6px; font-weight:400;">
+      View proof
+    </button>
+  `;    
+} else if (fileType.startsWith("video/")) {
+    filePreviewHTML = `
+      <video src="${fileURL}"
+             controls
+             style="max-width:200px; max-height:200px; margin:10px 0;">
+      </video>
+    `;
+  } else {
+    filePreviewHTML = `
+      <a href="${fileURL}" target="_blank">View Submission</a>
+    `;
+  }
+}
+
+  if (ts) {
+    if (ts.seconds !== undefined) {
+      const date = new Date(ts.seconds * 1000); // seconds → ms
+      submittedAtStr = date.toLocaleString();   // human-readable
+    } else {
+      submittedAtStr = new Date(ts).toLocaleString(); // fallback
+    }
+  }
+
+  const card = document.createElement("div");
+  card.className = "task-card";
+
+  card.innerHTML = `
+    <div class="task-flag" data-id="${docSnap.id}">🏴</div>
+    <div class="task-status ${t.status.toLowerCase().trim()}">
+      ${t.status}
+    </div>
+    <div class="task-title">${t.title}</div>
+<div class="task-meta">
+  <div><strong>Task Code:</strong> ${t.taskCode}</div>
+  <div><strong>Submitted by:</strong> ${t.submission?.submittedByName || "—"}</div>
+  <div><strong>Reward:</strong> ₦${t.reward}</div>
+  <div><strong>Time:</strong> ${submittedAtStr}</div>
+  ${t.link ? `<div><a href="${t.link}" target="_blank" class="task-link">Open Link</a></div>` : ""}
+</div>
+      ${filePreviewHTML}
+  `;
+
+  // ===== FLAG CLICK LOGIC =====
+  const flagIcon = card.querySelector(".task-flag");
+
+  if (t.status.toLowerCase().trim() === "flagged") {
+    flagIcon.style.pointerEvents = "none";
+    flagIcon.style.opacity = "0.5";
+  } else {
+    flagIcon.onclick = () => openFlagModal(docSnap.id, t.assignedTo);
+  }
+
+  list.appendChild(card);
+});
+}
+async function openVReportProject(projectId) {
+  const page = document.getElementById("vReportProjectPage");
+  const detailsContainer = document.getElementById("vReportDetails");
+
+  openPage(page);
+  detailsContainer.innerHTML = "Loading...";
+
+  try {
+    const projectRef = doc(db, "projects", projectId);
+    const projectSnap = await getDoc(projectRef);
+
+    if (!projectSnap.exists()) {
+      detailsContainer.innerHTML = "Project not found";
+      return;
+    }
+
+    const projectData = projectSnap.data();
+
+    // Format reportedAt
+    let reportedAtStr = "—";
+    if (projectData.reportedAt) {
+      const ts = projectData.reportedAt;
+      if (ts.seconds !== undefined) {
+        reportedAtStr = new Date(ts.seconds * 1000).toLocaleString();
+      } else {
+        reportedAtStr = new Date(ts).toLocaleString();
+      }
+    }
+
+    // Render UI
+    detailsContainer.innerHTML = `
+      <div class="project-field"><strong>Project Code:</strong> ${projectData.projectCode}</div>
+      <div class="project-field"><strong>Title:</strong> ${projectData.title}</div>
+      <div class="project-field"><strong>Reported At:</strong> ${reportedAtStr}</div>
+      <div class="project-field"><strong>Reported By:</strong> ${projectData.reportedByName || "—"}</div>
+      <div class="project-field"><strong>Reason:</strong> ${projectData.reason || "—"}</div>
+
+      <div class="project-field">
+        <strong>Link:</strong><br>
+        <input type="text" id="vReportLink" value="${projectData.link || ""}" style="width:100%; padding:5px;">
+      </div>
+
+      <div class="project-field">
+        <strong>Description:</strong><br>
+        <textarea id="vReportDesc" rows="4" style="width:100%; padding:5px;">${projectData.description || ""}</textarea>
+      </div>
+
+      <button id="confirmVReportEdit" style="margin-top:10px;">Update Project</button>
+    `;
+
+    const linkField = document.getElementById("vReportLink");
+    const descField = document.getElementById("vReportDesc");
+    const confirmBtn = document.getElementById("confirmVReportEdit");
+
+    confirmBtn.onclick = async () => {
+      try {
+        // ✅ Update project and tasks
+        await updateDoc(projectRef, {
+          link: linkField.value.trim(),
+          description: descField.value.trim(),
+          projectStatus: "in-progress"
+        });
+
+        const tasksSnap = await getDocs(
+          query(collection(db, "tasks"), where("projectId", "==", projectId))
+        );
+
+        const updates = [];
+        tasksSnap.forEach(t => {
+          updates.push(updateDoc(doc(db, "tasks", t.id), {
+            status: "Available",
+            link: linkField.value.trim(),
+            description: descField.value.trim()
+          }));
+        });
+
+        await Promise.all(updates);
+
+        // ✅ Reload dashboard projects
+        loadClientProjects(auth.currentUser.uid);
+
+        // ✅ Close the V-Report page
+        closePage(page);
+
+        await showAlertModal("Project and tasks updated successfully");
+
+      } catch (err) {
+        console.error(err);
+        await showAlertModal("Failed to update project/tasks");
+      }
+    };
+
+  } catch (err) {
+    console.error(err);
+    detailsContainer.innerHTML = "Error loading project";
+  }
+}
+
+let flaggedTaskId = null;
+let flaggedUserId = null;
+
+function openFlagModal(taskId, userId) {
+  flaggedTaskId = taskId;
+  flaggedUserId = userId;
+
+  const modal = document.getElementById("flagModal");
+  modal.classList.add("active");
+
+  // 🔑 IMPORTANT: add modal to history
+  history.pushState({ type: "flagModal" }, "");
+}
+
+document.getElementById("cancelFlag").onclick = () => {
+  document.getElementById("flagModal").classList.remove("active");
+};
+
+document.getElementById("confirmFlag").onclick = async () => {
+  try {
+    // ✅ Validate
+    if (!flaggedTaskId || !flaggedUserId) {
+      await showAlertModal("Missing task or user information");
+      return;
+    }
+
+    const taskRef = doc(db, "tasks", flaggedTaskId);
+    const userRef = doc(db, "users", flaggedUserId);
+
+    const clientId = auth.currentUser.uid;
+    const clientName = auth.currentUser.displayName || "Client";
+
+    // 1️⃣ Mark task as flagged
+    await updateDoc(taskRef, {
+      status: "flagged",
+      flaggedAt: serverTimestamp(),
+      flaggedBy: {
+        uid: clientId,
+        name: clientName
+      },
+      flagReason: "Fake engagement",
+      flagNote: "Screenshots do not match task instructions"
+    });
+
+    // 2️⃣ Read user stats
+    const userSnap = await getDoc(userRef);
+    const currentFlagged = userSnap.data()?.stats?.flagged || 0;
+    const newFlagged = currentFlagged + 33;
+
+    // 3️⃣ Build update safely
+    const userUpdate = {
+      "stats.flagged": newFlagged
+    };
+
+    if (newFlagged >= 99) {
+      userUpdate.accountStatus = "banned";
+    }
+
+    // 4️⃣ Update user
+    await updateDoc(userRef, userUpdate);
+
+    document.getElementById("flagModal").classList.remove("active");
+
+    await showAlertModal(
+      newFlagged >= 99
+        ? "User is now banned!"
+        : "Task rejected and flagged"
+    );
+
+    // Optional: reset state
+    flaggedTaskId = null;
+    flaggedUserId = null;
+
+  } catch (err) {
+    console.error("Reject error:", err);
+    await showAlertModal("Failed to reject task");
+  }
+};
+document
+  .getElementById("openCompletedProjects")
+  .addEventListener("click", () => {
+    if (!auth.currentUser) return;
+
+    openPage("completedProjects");
+    loadCompletedProjects(auth.currentUser.uid);
+  });
+  
+  async function loadVReportProjects(userId) {
+  const list = document.getElementById("vReportProjectsList");
+
+  list.innerHTML =
+    "<div style='text-align:center; margin:20px;'>Loading v-report projects...</div>";
+
+  const q = query(
+    collection(db, "projects"),
+    where("createdBy", "==", userId),
+    where("projectStatus", "==", "v-report")
+  );
+
+const cardColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.2)",
+  "status-completed": "rgba(135, 206, 235, 0.2)",
+  "status-v-report": "rgba(255, 165, 0, 0.2)"
+};
+
+const metaColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.35)",
+  "status-completed": "rgba(135, 206, 235, 0.35)",
+  "status-v-report": "rgba(255, 165, 0, 0.35)"
+};
+
+const textColors = {
+  "status-in-progress": "#286028",
+  "status-completed": "#0a3d66",
+  "status-v-report": "#663c00"
+};
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    list.innerHTML =
+      "<div style='text-align:center; color:#888;'>No v-report projects found</div>";
+    return;
+  }
+
+  const projects = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+
+  list.innerHTML = "";
+
+  projects.forEach(p => {
+    const statusClass = "status-v-report";
+    const card = document.createElement("div");
+    card.className = "project-card";
+
+    card.innerHTML = `
+      <div class="project-status status-v-report">v-report</div>
+
+      <div class="project-code">Code: ${p.projectCode}</div>
+      <div class="project-title">${p.title}</div>
+      <div class="project-desc">${p.description}</div>
+
+      <div class="project-meta ${statusClass}">
+        <span>Reward: ₦${p.reward}</span>
+        <span>Engagements: ${p.engagers}</span>
+      </div>
+
+<div style="font-size:12px; margin:28px 0; color:#00cc88; font-weight:bold;">   Project Fee: ₦${Number(p.projectFee).toLocaleString("en-NG")} </div>
+        ${p.link ? `<div class="project-link" data-link="${p.link}">Open Link</div>` : ""}
+      <div class="project-time">
+        ${new Date(p.createdAt.seconds * 1000).toLocaleString()}
+      </div>
+    `;
+    
+    card.style.backgroundColor = cardColors[statusClass];
+card.style.color = textColors[statusClass];
+
+const meta = card.querySelector(".project-meta");
+if (meta) {
+  meta.style.backgroundColor = metaColors[statusClass];
+  meta.style.color = textColors[statusClass];
+  meta.style.borderRadius = "8px";
+  meta.style.padding = "8px 12px";
+}
+    
+if (p.link) {
+  const linkDiv = card.querySelector(".project-link");
+  linkDiv.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent card's click event from firing
+    window.open(p.link, "_blank"); // opens in new tab
+  });
+}
+    card.onclick = () => openVReportProject(p.id);
+
+    list.appendChild(card);
+  });
+}
+  
+async function loadCompletedProjects(userId) {
+  const list = document.getElementById("completedProjectsList");
+
+  list.innerHTML =
+    "<div style='text-align:center; margin:20px auto;'>Loading completed projects...</div>";
+
+  const q = query(
+    collection(db, "projects"),
+    where("createdBy", "==", userId),
+    where("projectStatus", "==", "completed")
+  );
+  
+  const cardColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.2)",
+  "status-completed": "rgba(135, 206, 235, 0.2)",
+  "status-v-report": "rgba(255, 165, 0, 0.2)"
+};
+
+const metaColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.35)",
+  "status-completed": "rgba(135, 206, 235, 0.35)",
+  "status-v-report": "rgba(255, 165, 0, 0.35)"
+};
+
+const textColors = {
+  "status-in-progress": "#286028",
+  "status-completed": "#0a3d66",
+  "status-v-report": "#663c00"
+};
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    list.innerHTML =
+      "<div style='text-align:center; color:#888; margin:20px;'>No completed projects yet</div>";
+    return;
+  }
+
+  const projects = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => b.completedAt.seconds - a.completedAt.seconds);
+
+  list.innerHTML = "";
+
+  projects.forEach(p => {
+    const statusClass = "status-completed";
+    const card = document.createElement("div");
+    card.className = "project-card";
+
+    card.innerHTML = `
+      <div class="project-status status-completed">completed</div>
+
+      <div class="project-completed-time">
+        Completed: ${new Date(p.completedAt.seconds * 1000).toLocaleString()}
+      </div>
+
+      <div class="project-code">Code: ${p.projectCode}</div>
+      <div class="project-title">${p.title}</div>
+      <div class="project-desc">${p.description}</div>
+
+      <div class="com-project-meta">
+        <span>Reward: ₦${p.reward}</span>
+        <span>Engagements: ${p.engagers}</span>
+      </div>
+
+<div style="font-size:12px; margin:28px 0; color:#00cc88; font-weight:bold;">   Project Fee: ₦${Number(p.projectFee).toLocaleString("en-NG")} </div>
+
+${p.link ? `<div class="project-link" data-link="${p.link}">Open Link</div>` : ""}
+
+      <div class="project-time">
+        ${new Date(p.createdAt.seconds * 1000).toLocaleString()}
+      </div>
+    `;
+   
+   card.style.backgroundColor = cardColors[statusClass];
+card.style.color = textColors[statusClass];
+
+const meta = card.querySelector(".project-meta");
+if (meta) {
+  meta.style.backgroundColor = metaColors[statusClass];
+  meta.style.color = textColors[statusClass];
+  meta.style.borderRadius = "8px";
+  meta.style.padding = "8px 12px";
+}
+    
+if (p.link) {
+  const linkDiv = card.querySelector(".project-link");
+  linkDiv.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent card's click event from firing
+    window.open(p.link, "_blank"); // opens in new tab
+  });
+}
+    card.onclick = () => openCompletedProject(p.id);
+
+    list.appendChild(card);
+  });
+}
+
+async function loadInProgressProjects(userId) {
+  const container = document.getElementById("inProgressProjectsList");
+
+  // Loading state
+  container.innerHTML = "<div style='text-align:center; margin:20px;'>Loading projects...</div>";
+
+  // Fetch all projects created by this user
+  const q = query(
+    collection(db, "projects"),
+    where("createdBy", "==", userId)
+  );
+  
+  const cardColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.2)",
+  "status-completed": "rgba(135, 206, 235, 0.2)",
+  "status-v-report": "rgba(255, 165, 0, 0.2)"
+};
+
+const metaColors = {
+  "status-in-progress": "rgba(148, 193, 149, 0.35)",
+  "status-completed": "rgba(135, 206, 235, 0.35)",
+  "status-v-report": "rgba(255, 165, 0, 0.35)"
+};
+
+const textColors = {
+  "status-in-progress": "#286028",
+  "status-completed": "#0a3d66",
+  "status-v-report": "#663c00"
+};
+
+  const snap = await getDocs(q);
+
+  if (snap.empty) {
+    container.innerHTML = "<div style='text-align:center; color:#888;'>No n-progress projects</div>";
+    return;
+  }
+
+  // Filter projects that are NOT completed or v-report
+  const inProgressProjects = snap.docs
+    .map(docSnap => ({ id: docSnap.id, ...docSnap.data() }))
+    .filter(p => p.projectStatus !== "completed" && p.projectStatus !== "v-report")
+    .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+
+  container.innerHTML = ""; // Clear loading
+
+  if (inProgressProjects.length === 0) {
+    container.innerHTML = "<div style='text-align:center; color:#888;'>No in progress projects</div>";
+    return;
+  }
+
+  // Render each in-progress project
+  inProgressProjects.forEach(p => {
+    const statusClass = "status-in-progress";
+    const card = document.createElement("div");
+    card.className = "project-card";
+
+    card.innerHTML = `
+      <div class="project-status status-in-progress">${p.projectStatus}</div>
+      <div class="project-code">Code: ${p.projectCode}</div>
+      <div class="project-title">${p.title}</div>
+      <div class="project-desc">${p.description}</div>
+      <div class="project-meta">
+        <span>Reward: ₦${p.reward}</span>
+        <span>Engagements: ${p.engagers}</span>
+      </div>
+ <div style="font-size:12px; margin:28px 0; color:#00cc88; font-weight:bold;">   Project Fee: ₦${Number(p.projectFee).toLocaleString("en-NG")} </div>
+ 
+         ${p.link ? `<div class="project-link" data-link="${p.link}">Open Link</div>` : ""}
+ 
+      <div class="project-time">${new Date(p.createdAt.seconds * 1000).toLocaleString()}</div>
+    `;
+    
+    card.style.backgroundColor = cardColors[statusClass];
+card.style.color = textColors[statusClass];
+
+const meta = card.querySelector(".project-meta");
+if (meta) {
+  meta.style.backgroundColor = metaColors[statusClass];
+  meta.style.color = textColors[statusClass];
+  meta.style.borderRadius = "8px";
+  meta.style.padding = "8px 12px";
+}
+    
+if (p.link) {
+  const linkDiv = card.querySelector(".project-link");
+  linkDiv.addEventListener("click", (e) => {
+    e.stopPropagation(); // prevent card's click event from firing
+    window.open(p.link, "_blank"); // opens in new tab
+  });
+}
+    // Open the existing edit/view page when clicked
+    card.onclick = () => openProject(p.id);
+
+    container.appendChild(card);
+  });
+}
+
+async function loadClientProjects(userId) {
+  const inProgressBox = document.getElementById("inProgressContainer");
+  const completedBox = document.getElementById("completedContainer");
+  const vReportBox = document.getElementById("suspendedContainer");
+
+  // Loading state
+  inProgressBox.innerHTML =
+    completedBox.innerHTML =
+    vReportBox.innerHTML =
+      "<div style='text-align:center; margin:20px auto; padding:14px;'>Loading...</div>";
+
+  const q = query(collection(db, "projects"), where("createdBy", "==", userId));
+  const snap = await getDocs(q);
+
+  const projects = snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .sort((a, b) => b.createdAt.seconds - a.createdAt.seconds);
+
+  // Clear containers
+  inProgressBox.innerHTML = "";
+  completedBox.innerHTML = "";
+  vReportBox.innerHTML = "";
+
+  // Split by status
+  const inProgressProjects = projects.filter(
+    p => p.projectStatus !== "completed" && p.projectStatus !== "v-report"
+  );
+  const completedProjects = projects.filter(p => p.projectStatus === "completed");
+  const vReportProjects = projects.filter(p => p.projectStatus === "v-report");
+
+  // Status colors
+  const cardColors = {
+    "status-in-progress": "rgba(148, 193, 149, 0.2)",  // green glass
+    "status-completed": "rgba(135, 206, 235, 0.2)",   // blue glass
+    "status-v-report": "rgba(255, 165, 0, 0.2)"       // orange glass
+  };
+  const metaColors = {
+    "status-in-progress": "rgba(148, 193, 149, 0.35)",
+    "status-completed": "rgba(135, 206, 235, 0.35)",
+    "status-v-report": "rgba(255, 165, 0, 0.35)"
+  };
+  const textColors = {
+    "status-in-progress": "#286028",
+    "status-completed": "#0a3d66",
+    "status-v-report": "#663c00"
+  };
+
+  function renderSection(container, projectArray, label) {
+    const displayCount = Math.min(5, projectArray.length);
+
+    projectArray.slice(0, displayCount).forEach(p => {
+      const statusClass =
+        p.projectStatus === "completed"
+          ? "status-completed"
+          : p.projectStatus === "v-report"
+          ? "status-v-report"
+          : "status-in-progress";
+
+      const card = document.createElement("div");
+      card.className = "project-card";
+
+      // Set card and text colors
+      const cardColor = cardColors[statusClass] || "#fff";
+      const cardTextColor = textColors[statusClass] || "#000";
+      card.style.backgroundColor = cardColor;
+      card.style.color = cardTextColor;
+
+      // Create inner HTML
+      card.innerHTML = `
+        <div class="project-status ${statusClass}">${p.projectStatus}</div>
+        ${
+          p.projectStatus === "completed" && p.completedAt
+            ? `<div class="project-completed-time">
+                 Completed: ${new Date(p.completedAt.seconds * 1000).toLocaleString()}
+               </div>`
+            : ""
+        }
+        <div class="project-code">Code: ${p.projectCode}</div>
+        <div class="project-title">${p.title}</div>
+        <div class="project-desc">${p.description}</div>
+        <div class="project-meta comp">
+          <span>Reward: ₦${p.reward}</span>
+          <span>Engagements: ${p.engagers}</span>
+        </div>
+<div style="font-size:12px; margin:28px 0; color:#00cc88; font-weight:bold;">
+  Project Fee: ₦${Number(p.projectFee).toLocaleString("en-NG")}
+</div>
+        ${p.link ? `<div class="project-link" data-link="${p.link}">Open Link</div>` : ""}
+        <div class="project-time">
+          ${new Date(p.createdAt.seconds * 1000).toLocaleString()}
+        </div>
+      `;
+
+      // Apply meta background after innerHTML is set
+      const meta = card.querySelector(".project-meta");
+      if (meta) {
+        meta.style.backgroundColor = metaColors[statusClass] || "#fff";
+        meta.style.color = cardTextColor;
+        meta.style.borderRadius = "8px";
+        meta.style.padding = "8px 12px";
+      }
+
+      // Open link handler
+      if (p.link) {
+        const linkDiv = card.querySelector(".project-link");
+        linkDiv.addEventListener("click", e => {
+          e.stopPropagation();
+          window.open(p.link, "_blank");
+        });
+      }
+
+      // Card click
+      card.addEventListener("click", () => {
+        if (p.projectStatus === "completed") openCompletedProject(p.id);
+        else if (p.projectStatus === "v-report") openVReportProject(p.id);
+      });
+
+      container.appendChild(card);
+    });
+
+    // Info text below cards
+    const info = document.createElement("div");
+    info.style.textAlign = "center";
+    info.style.margin = "14px 0";
+    info.style.fontSize = "13px";
+    info.style.color = "#888";
+    info.textContent =
+      projectArray.length === 0
+        ? `No ${label} projects yet`
+        : `Showing ${displayCount} of ${projectArray.length} ${label} projects`;
+    container.appendChild(info);
+  }
+
+  // Render all sections
+  renderSection(inProgressBox, inProgressProjects, "in-progress");
+  renderSection(completedBox, completedProjects, "completed");
+  renderSection(vReportBox, vReportProjects, "v-report");
+
+  // Counters
+  document.getElementById("pendingCount").textContent = inProgressProjects.length;
+  document.getElementById("completedCount").textContent = completedProjects.length;
+  document.getElementById("suspendedCount").textContent = vReportProjects.length;
+}
+
+/* ===============================
+   AUTH & ROLE CHECK
+=============================== */
+const usernameDisplay = document.getElementById("Username");
+const balanceDisplay = document.getElementById("balance");
+const REQUIRED_ROLE = "client";
+
+onAuthStateChanged(auth, async user => {
+  if (!user) return window.location.href = "1page.html";
+  
+  const inProgressBtn = document.getElementById("openInProgressProjects");
+  if (!inProgressBtn) return;
+
+  inProgressBtn.addEventListener("click", () => {
+    openPage("inProgressProjects");
+    loadInProgressProjects(user.uid);
+  });
+  
+const vReportBtn = document.getElementById("openVReportProjects");
+  if (!vReportBtn) return;
+
+  vReportBtn.addEventListener("click", () => {
+    openPage("vReportProjects");
+    loadVReportProjects(user.uid);
+  });
+  try {
+    const userRef = doc(db, "users", user.uid);
+    const userSnap = await getDoc(userRef);
+
+    if (!userSnap.exists()) return window.location.href = "no_access.html";
+
+    const data = userSnap.data();
+    if (data.role !== REQUIRED_ROLE) return window.location.href = "no_access.html";
+
+    usernameDisplay.textContent = data.nickname || "user";
+    balanceDisplay.textContent = "₦" + (data.balance ?? 0).toLocaleString(2);
+
+    loadClientProjects(user.uid);
+    fetchClientName();
+  } catch (err) {
+    console.error(err);
+    window.location.href = "login.html";
+  }
+});
+
+const selectAdminBtn = document.getElementById("selectAdminBtn");
+const adminList = document.getElementById("adminList");
+const selectedAdminIdInput = document.getElementById("selectedAdminId");
+const selectedAdminPreview = document.getElementById("selectedAdminPreview");
+
+selectAdminBtn.onclick = () => {
+  openPage("adminSelectPage");
+  loadAdmins();
+};
+function selectAdmin(adminId, adminName) {
+  // Save selection
+  document.getElementById("selectedAdminId").value = adminId;
+  document.getElementById("selectedAdminName").value = adminName;
+
+  // Update UI
+  document.getElementById("selectedAdminPreview").textContent =
+    `Selected Admin: ${adminName}`;
+
+  // 🔙 Return to form page
+  goBack();
+  submitBtn.disabled = false;
+}
+async function loadAdmins() {
+  adminList.innerHTML = "Loading admins...";
+
+  try {
+    const q = query(
+      collection(db, "users"),
+      where("role", "==", "admin")
+    );
+
+    const snap = await getDocs(q);
+
+    if (snap.empty) {
+      adminList.innerHTML = "No admins found";
+      return;
+    }
+
+    adminList.innerHTML = "";
+
+    snap.forEach(docSnap => {
+      const admin = docSnap.data();
+
+      const card = document.createElement("div");
+      card.className = "admin-card";
+
+      card.innerHTML = `
+        <div class="admin-name">${admin.name || "Unnamed Admin"}</div>
+        <div class="admin-bio">${admin.bio || "No bio provided"}</div>
+      `;
+
+      card.onclick = () => {
+        selectAdmin(docSnap.id, admin.name);
+      };
+
+      adminList.appendChild(card);
+    });
+
+  } catch (err) {
+    console.error(err);
+    adminList.innerHTML = "Failed to load admins";
+  }
+}
+async function handlePaymentAndCreateProject() {
+  try {
+    // ✅ Get client, admin, and owner data
+    const clientRef = doc(db, "users", auth.currentUser.uid);
+    const adminId = document.getElementById("selectedAdminId").value;
+
+    if (!adminId) throw new Error("Admin not selected");
+
+    const adminRef = doc(db, "users", adminId);
+
+    // Query owner by role
+    const ownerQuery = query(collection(db, "users"), where("role", "==", "owner"));
+    const ownerSnap = await getDocs(ownerQuery);
+
+    if (ownerSnap.empty) {
+  hideOverlay();
+  await showAlertModal("Cannot process payment: platform owner not found. Please contact support.");
+  return;
+}
+    const ownerDoc = ownerSnap.docs[0];
+    const ownerRef = ownerDoc.ref;
+
+    // Fetch all balances in parallel
+    const [clientSnap, adminSnap, ownerSnapData] = await Promise.all([
+      getDoc(clientRef),
+      getDoc(adminRef),
+      getDoc(ownerRef)
+    ]);
+
+    const clientData = clientSnap.data();
+    const adminData = adminSnap.data();
+    const ownerData = ownerSnapData.data();
+
+    // ✅ Calculate amounts
+    const engagementValue = Number(hiddenReward.value) * Number(hiddenEngager.value);
+    const platformFee = engagementValue * PLATFORM_PERCENT;
+    const totalClientPays = engagementValue + platformFee;
+
+    // ✅ Check if client has enough balance
+    if ((clientData.balance || 0) < totalClientPays) {
+      hideOverlay();
+      await showAlertModal(`Insufficient balance. You have ₦${clientData.balance || 0}, need ₦${totalClientPays}`);
+      return false; // stop submission
+    }
+
+    // ✅ Update balances atomically
+    await Promise.all([
+      updateDoc(clientRef, { balance: (clientData.balance || 0) - totalClientPays }),
+      updateDoc(adminRef, { balance: (adminData.balance || 0) + engagementValue }),
+      updateDoc(ownerRef, { balance: (ownerData.balance || 0) + platformFee })
+    ]);
+
+    return true; // payment successful
+  } catch (err) {
+    console.error(err);
+    hideOverlay();
+    await showAlertModal(err.message || "Failed to process payment");
+    return false;
+  }
+}
+
+const overlay = document.getElementById("imageOverlay");
+const overlayImg = document.getElementById("overlayImage");
+
+let scale = 1;
+
+function openImageOverlay(src) {
+  if (!src) return;
+
+  overlay.style.display = "flex";
+  overlayImg.src = src;
+
+  scale = 1;
+  overlayImg.style.transform = `scale(${scale})`;
+
+  history.pushState({ imageOverlayOpen: true }, "");
+}
+
+function closeImageOverlay() {
+  overlay.style.display = "none";
+  overlayImg.src = "";
+
+  scale = 1;
+
+  if (history.state?.imageOverlayOpen) history.back();
+}
+
+// Close when clicking background
+overlay.addEventListener("click", () => {
+  history.back(); // goes to the previous page
+});
+
+// Zoom with mouse wheel
+overlayImg.addEventListener("wheel", e => {
+  e.preventDefault();
+  scale += e.deltaY < 0 ? 0.1 : -0.1;
+  scale = Math.max(1, scale);
+  overlayImg.style.transform = `scale(${scale})`;
+});
+
+// 🔴 THIS IS THE FIX
+window.openImageOverlay = openImageOverlay;
+window.closeImageOverlay = closeImageOverlay;
+
+
+  window.logout = function() {
+    signOut(auth)
+      .then(() => {
+        window.location.href = "1page.html"; // Redirect after logout
+      })
+      .catch((error) => {
+        console.error("Logout error:", error);
+      });
+  };
+
+</script>
+</body>
+</html>
